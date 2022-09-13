@@ -1,0 +1,52 @@
+// cabal v2-install base --enable-profiling --enable-library-profiling --enable-executable-profiling -j2 --dry-run
+{
+  // Automatically created by phoityne-vscode extension.
+
+  "version": "2.0.0",
+  "presentation": {
+    "reveal": "always",
+    "panel": "new"
+  },
+  "tasks": [
+    {
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "type": "shell",
+      "label": "Run",
+      "command": "cabal v2-run Blossom"
+    },
+    {
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "type": "shell",
+      "label": "Build All",
+      "command": "cabal v2-build"
+    },
+    {
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "type": "shell",
+      "label": "Test All",
+      "command": "cabal v2-test"
+    },
+    {
+      "group": "none",
+      "type": "shell",
+      "label": "GHCI",
+      "command": "cabal v2-repl"
+    },
+    {
+      "group": "none",
+      "type": "shell",
+      "label": "Update Hackage List",
+      "command": "cabal v2-update",
+      "problemMatcher": []
+    }
+  ]
+}
