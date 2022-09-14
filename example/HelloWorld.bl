@@ -1,6 +1,6 @@
 import Array;
 import IO;
 
-func main :: Array String -> IO I32
+func main :: args: Array String -> IO I32
     => printStr "Hello, World!"
         >> exit 0;
