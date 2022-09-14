@@ -4,6 +4,7 @@ module Blossom.Parsing.AbsSynTree (
     TopLevel(..),
     Function(..),
     Param(..),
+    Expr(..),
     Data(..),
     Constructor(..),
 ) where
@@ -13,7 +14,7 @@ import qualified LLVM.AST as LLVM
 
 data ModuleAST = ModuleAST {
     moduleImports :: [Import],
-    moduleTopExprs :: [TopLevelExpr]
+    moduleTopExprs :: [TopLevel]
     }
 
 newtype Import = Import LLVM.Name
@@ -25,7 +26,7 @@ data TopLevel
 data Function = Function {
     funcName :: LLVM.Name,
     funcParams :: [Param],
-    funcBody :: FunctionBody
+    funcBody :: Expr
     }
 
 data Param = Param {
@@ -33,9 +34,11 @@ data Param = Param {
     -- paramType ::
     }
 
+data Expr = Expr
+
 data Data = Data {
     dataName :: LLVM.Name,
-    dataCtors :: [Constructor],
+    dataCtors :: [Constructor]
     }
 
 data Constructor = Constructor {

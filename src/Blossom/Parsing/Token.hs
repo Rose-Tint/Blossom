@@ -20,6 +20,9 @@ data Token
     | TokDoubleColon
     | TokArrow
     | TokEqArrow
+    | TokImport
+    | TokFunc
+    | TokData
     | TokEnd
     deriving (Show, Eq)
 

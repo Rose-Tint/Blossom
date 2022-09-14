@@ -46,6 +46,9 @@ tokens :-
     "::"                    { reserved TokDoubleColon }
     "->"                    { reserved TokArrow }
     "=>"                    { reserved TokEqArrow }
+    "import"                { reserved TokImport }
+    "func"                  { reserved TokFunc }
+    "data"                  { reserved TokData }
 
 
 -- this lets the error messaging give a the proper position
