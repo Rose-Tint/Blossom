@@ -1,24 +1,24 @@
 module Blossom.Cmd (
-    CommandLine(..),
-    parseCommandLine,
+    CmdLine(..),
+    parseCmdLine,
 ) where
 
 import Options.Applicative
 
 
-data CommandLine = CommandLine {
+data CmdLine = CmdLine {
     cmdSourceFiles :: [FilePath]
     }
 
 
-parseCommandLine :: IO CommandLine
-parseCommandLine = execParser commandLineParserInfo
+parseCmdLine :: IO CmdLine
+parseCmdLine = execParser cmdLineParserInfo
 
-commandLineParserInfo :: ParserInfo CommandLine
-commandLineParserInfo = info
-    (helper <*> commandLineParser)
+cmdLineParserInfo :: ParserInfo CmdLine
+cmdLineParserInfo = info
+    (helper <*> cmdLineParser)
     fullDesc
 
-commandLineParser :: Parser CommandLine
-commandLineParser = CommandLine
+cmdLineParser :: Parser CmdLine
+cmdLineParser = CmdLine
     <$> many (strArgument mempty)

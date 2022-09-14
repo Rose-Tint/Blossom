@@ -2,8 +2,10 @@ module Main (
     main
 ) where
 
-import System.Exit (exitSuccess)
+import Blossom.Cmd
 
 
 main :: IO ()
-main = exitSuccess
+main = do
+    _cmd <- parseCmdLine
+    return ()
