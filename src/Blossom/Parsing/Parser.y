@@ -30,8 +30,8 @@ import Blossom.Parsing.Token
 
 %%
 
-Module :: { AbsSynTree }
-    : {- EMPTY -} { AbsSynTree }
+Module :: { ModuleAST }
+    : {- EMPTY -} { ModuleAST [] [] }
 
 
 {
