@@ -77,4 +77,5 @@ test-suite Test
         test
     build-depends:
         BlossomLib,
-        HUnit >= 1.6.2.0
+        bytestring >= 0.10.12,
+        HUnit      >= 1.6.2.0

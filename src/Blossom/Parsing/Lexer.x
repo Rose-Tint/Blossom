@@ -7,6 +7,7 @@ module Blossom.Parsing.Lexer (
     runAlex,
     alexError,
     lexer,
+    tokenize,
 ) where
 
 import Data.Char (digitToInt)
@@ -103,4 +104,17 @@ reserved tok (_pos, _prev, _input, _) _len = return tok
 lexer :: (Token -> Alex a) -> Alex a
 lexer = (alexMonadScan >>=)
 
+-- | Turns a bytestring into either an error message (`@Left@`), or
+-- a list of tokens.
+tokenize :: ByteString.ByteString -> Either String [Token]
+tokenize bs = runAlex bs tokenizer
+    where
+        tokenizer :: Alex [Token]
+        tokenizer = do
+            tok <- alexMonadScan
+            if tok == TokEnd then
+                return []
+            else do
+                toks <- tokenizer
+                return (tok:toks)
 }

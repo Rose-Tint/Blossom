@@ -1,5 +1,7 @@
 module Blossom.Parsing.Token (
     Token(..),
+    mkSmallId,
+    mkBigId,
 ) where
 
 import qualified Data.ByteString.Lazy as BS
@@ -19,3 +21,14 @@ data Token
     | TokArrow
     | TokEqArrow
     | TokEnd
+    deriving (Show, Eq)
+
+
+-- | Creates a `@TokSmallId@` using a `@String@`
+mkSmallId :: String -> Token
+mkSmallId = TokSmallId . LLVM.mkName
+
+-- | Creates a `@TokBigId@` using a `@String@`
+mkBigId :: String -> Token
+mkBigId = TokBigId . LLVM.mkName
+
