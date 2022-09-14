@@ -9,11 +9,18 @@
 - [Patterns](#patterns)
 - [Functions](#functions)
 - [Purity](#purity)
-- [Parametric Types](#parametric-types)
+<!-- - [Parametric Types](#parametric-types) -->
 - [User-Defined Types](#user-defined-types)
 
 
 ## Identifiers
+
+- Types
+    - Begin with a capital letter
+    - Match the regular expression "$\[A-Z\]\[a-z-A-Z0-9_'\]^"
+- Functions
+    - Begin with a lower-case letter or an underscore
+    - Match the regular expression "$\[a-z_\]\[a-z-A-Z0-9_'\]^"
 
 
 ## Primitive Types
@@ -25,22 +32,29 @@
 - floating
     - `f16`, `f32`, `f64`
 - `String`
+- `Unit`
 
 
 ## Declarations and Definitions
 
+- functions
+    - possibilities:
+
 
 ## Patterns
 
+Blossom has pattern-matching
+
 
 ## Functions
+
+- Partial application
 
 
 ## Purity
 
 
-## Parametric Types
+<!-- ## Parametric Types -->
 
 
 ## User-Defined Types
-
