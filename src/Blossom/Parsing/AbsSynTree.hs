@@ -30,7 +30,7 @@ data Function = Function {
     }
 
 data Param = Param {
-    paramName :: LLVM.Name
+    paramName :: Maybe LLVM.Name
     -- paramType ::
     }
 
