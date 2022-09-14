@@ -15,7 +15,7 @@ extra-source-files:
 
 common base-depends
     build-depends:
-        base >= 4.14.0.0
+        base >= 4.15
     default-language: Haskell2010
     default-extensions:
         BangPatterns
@@ -30,34 +30,23 @@ common base-depends
         -Werror
 
 
-library PrettyText
-    import:
-        base-depends
-    exposed-modules:
-        Text.Pretty
-    -- build-depends:
-    hs-source-dirs: src
-    -- other-modules:
-    -- default-extensions:
-    -- other-extensions:
-
 library BlossomLib
     import:
         base-depends
     exposed-modules:
         Blossom.Cmd,
         Blossom.CodeGen,
-        Blossom.Parsing.AST,
-        -- Blossom.Parsing.Lexer,
-        -- Blossom.Parsing.Parser,
+        Blossom.Parsing.AbsSynTree,
+        Blossom.Parsing.Lexer,
+        Blossom.Parsing.Parser,
         Blossom.Parsing.Token
-    -- other-modules:
-    -- default-extensions:
-    -- other-extensions:
-    -- build-tool-depends:
-    --     alex:alex   >= 3.2,
-    --     happy:happy >= 1.20
-    -- build-depends:
+    build-tool-depends:
+        alex:alex   >= 3.2,
+        happy:happy >= 1.20
+    build-depends:
+        array        >= 0.5.4,
+        bytestring   >= 0.10.12,
+        llvm-hs-pure >= 9.0.0
     hs-source-dirs: src
 
 executable Blossom
@@ -75,8 +64,9 @@ test-suite Test
         base-depends
     type: exitcode-stdio-1.0
     main-is: app/Test.hs
-    hs-source-dirs: test
+    hs-source-dirs:
+        ./,
+        test
     build-depends:
         BlossomLib,
-        PrettyText,
         HUnit >= 1.6.2.0
