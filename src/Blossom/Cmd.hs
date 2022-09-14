@@ -1,6 +1,5 @@
 module Blossom.Cmd (
     CommandLine(..),
-    Verbosity(..),
     parseCommandLine,
 ) where
 
@@ -13,13 +12,13 @@ data CommandLine = CommandLine {
 
 
 parseCommandLine :: IO CommandLine
-parseCommandLine = execParser commandLineInfo
+parseCommandLine = execParser commandLineParserInfo
 
-commandLineInfo :: ParserInfo CommandLine
-commandLineInfo = info
-    (helper <*> commandLine)
+commandLineParserInfo :: ParserInfo CommandLine
+commandLineParserInfo = info
+    (helper <*> commandLineParser)
     fullDesc
 
-commandLine :: Parser CommandLine
-commandLine = CommandLine
+commandLineParser :: Parser CommandLine
+commandLineParser = CommandLine
     <$> many (strArgument mempty)
