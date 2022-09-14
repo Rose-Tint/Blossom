@@ -1,7 +1,7 @@
 module Blossom.Parsing.AbsSynTree (
     ModuleAST(..),
     Import(..),
-    TopLevel(..),
+    TopLevelExpr(..),
     Function(..),
     Param(..),
     Expr(..),
@@ -14,12 +14,12 @@ import qualified LLVM.AST as LLVM
 
 data ModuleAST = ModuleAST {
     moduleImports :: [Import],
-    moduleTopExprs :: [TopLevel]
+    moduleTopExprs :: [TopLevelExpr]
     }
 
 newtype Import = Import LLVM.Name
 
-data TopLevel
+data TopLevelExpr
     = FuncDef Function
     | DataDef Data
 
