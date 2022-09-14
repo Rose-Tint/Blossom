@@ -2,8 +2,12 @@ module Main (
     main
 ) where
 
-import System.Exit (exitSuccess)
+
+import Test.HUnit
 
 
 main :: IO ()
-main = exitSuccess
+main = runTestTTAndExit tests
+
+tests :: Test
+tests = TestLabel "Blossom Tests" $ TestList []
