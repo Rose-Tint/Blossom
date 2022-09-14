@@ -29,7 +29,7 @@ $id_char            = [a-zA-Z0-9\_\']
 @comment            = "--" .*
 @integer            = $digit+
 @float              = $digit+ \. $digit+
-@string             = \" .* \"
+@string             = \" [^\"]* \"
 @small_id           = $small $id_char*
 @big_id             = $big $id_char*
 
