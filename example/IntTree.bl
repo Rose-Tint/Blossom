@@ -1,0 +1,4 @@
+data IntTree {
+    Node :: value: I64 -> left: IntTree -> right: IntTree;
+    Empty;
+}
