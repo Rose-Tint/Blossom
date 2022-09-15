@@ -20,6 +20,10 @@ data Token
     | TokDoubleColon
     | TokArrow
     | TokEqArrow
+    | TokLParen
+    | TokRParen
+    | TokLBrace
+    | TokRBrace
     | TokImport
     | TokFunc
     | TokData

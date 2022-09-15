@@ -46,6 +46,10 @@ tokens :-
     "::"                    { reserved TokDoubleColon }
     "->"                    { reserved TokArrow }
     "=>"                    { reserved TokEqArrow }
+    "("                     { reserved TokLParen }
+    ")"                     { reserved TokRParen }
+    "{"                     { reserved TokLBrace }
+    "}"                     { reserved TokRBrace }
     "import"                { reserved TokImport }
     "func"                  { reserved TokFunc }
     "data"                  { reserved TokData }

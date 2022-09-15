@@ -28,6 +28,10 @@ import Blossom.Typing.Type
     "::"                    { TokDoubleColon }
     "->"                    { TokArrow }
     "=>"                    { TokEqArrow }
+    "("                     { TokLParen }
+    ")"                     { TokRParen }
+    "{"                     { TokLBrace }
+    "}"                     { TokRBrace }
     import                  { TokImport }
     func                    { TokFunc }
     data                    { TokData }
@@ -53,6 +57,7 @@ TopLevel :: { [TopLevelExpr] }
 
 TopLevelExpr :: { TopLevelExpr }
     : FunctionDefinition { FuncDef $1 }
+    | DataDefinition { DataDef $1 }
 
 FunctionDefinition :: { Function }
     : func small_id "::" Params "=>" Expr ";" { Function (Just $2) $4 $6 }
@@ -69,14 +74,19 @@ Param :: { Param }
     | Type { Param Nothing $1 }
 
 Expr :: { Expr }
+    : Term { $1 }
+    | Params "=>" Expr { mkLambda $1 $3 }
+    | if Term then Expr else Expr { IfElse $2 $4 $6 }
+
+Term :: { Expr }
     : small_id { VarExpr $1 }
     | big_id { VarExpr $1 }
-    | Expr Expr { FuncApp $1 $2 }
-    | Params "=>" Expr { mkLambda $1 $3 }
-    | if Expr then Expr else Expr { IfElse $2 $4 $6 }
+    | Term Term { FuncApp $1 $2 }
+    | "(" Expr ")" { $2 }
 
 Type :: { Type }
     : big_id Types0 { TypeCon $1 $2 }
+    | "(" Type ")" { $2 }
 
 Types0 :: { [Type] }
     : Types0_ { reverse $1 }
@@ -85,7 +95,17 @@ Types0_ :: { [Type] }
     : Types0_ Type { ($2:$1) }
     | {- EMPTY -} { [] }
 
+DataDefinition :: { Data }
+    : data big_id "{" Constructors "}" { Data $2 $4 }
 
+-- Order does not matter, so there is no need to use `@reverse@`
+Constructors :: { [Constructor] }
+    : Constructors Constructor { ($2:$1) }
+    | {- EMPTY -} { [] }
+
+Constructor :: { Constructor }
+    : big_id "::" Params ";" { Constructor $1 $3 }
+    | big_id { Constructor $1 [] }
 
 
 {
