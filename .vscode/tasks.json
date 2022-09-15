@@ -47,6 +47,12 @@
       "label": "Update Hackage List",
       "command": "cabal v2-update",
       "problemMatcher": []
+    },
+    {
+      "group": "none",
+      "type": "shell",
+      "label": "Happy info",
+      "command": "happy src/Blossom/Parsing/Parser.y -i -s -g -c -a; rm ./src/Blossom/Parsing/Parser.hs"
     }
   ]
 }
