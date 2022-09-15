@@ -6,6 +6,7 @@ module Blossom.Parsing.Parser (
 import Blossom.Parsing.AbsSynTree
 import Blossom.Parsing.Lexer
 import Blossom.Parsing.Token
+import Blossom.Typing.Type
 }
 
 
@@ -30,6 +31,9 @@ import Blossom.Parsing.Token
     import                  { TokImport }
     func                    { TokFunc }
     data                    { TokData }
+    if                      { TokIf }
+    then                    { TokThen }
+    else                    { TokElse }
 
 %%
 
@@ -51,24 +55,37 @@ TopLevelExpr :: { TopLevelExpr }
     : FunctionDefinition { FuncDef $1 }
 
 FunctionDefinition :: { Function }
-    : func small_id "::" Params "=>" Expr { Function $2 $4 $6 }
+    : func small_id "::" Params "=>" Expr ";" { Function (Just $2) $4 $6 }
 
 Params :: { [Param] }
     : Params_ { reverse $1}
 
 Params_ :: { [Param] }
     : Params_ Param { ($2:$1) }
-    | Type { [Param Nothing] }
+    | Type { [Param Nothing $1] }
 
 Param :: { Param }
-    : small_id ":" Type { Param (Just $1) }
-    | Type { Param Nothing }
+    : small_id ":" Type { Param (Just $1) $3 }
+    | Type { Param Nothing $1 }
 
 Expr :: { Expr }
-    : {- ... -} ";" { Expr }
+    : small_id { VarExpr $1 }
+    | big_id { VarExpr $1 }
+    | Expr Expr { FuncApp $1 $2 }
+    | Params "=>" Expr { mkLambda $1 $3 }
+    | if Expr then Expr else Expr { IfElse $2 $4 $6 }
 
-Type :: { () }
-    : { () }
+Type :: { Type }
+    : big_id Types0 { TypeCon $1 $2 }
+
+Types0 :: { [Type] }
+    : Types0_ { reverse $1 }
+
+Types0_ :: { [Type] }
+    : Types0_ Type { ($2:$1) }
+    | {- EMPTY -} { [] }
+
+
 
 
 {
