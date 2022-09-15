@@ -50,7 +50,7 @@ data Data = Data {
 
 data Constructor = Constructor {
     ctorName :: LLVM.Name,
-    ctorTypes :: [LLVM.Name]
+    ctorParams :: [Param]
     }
 
 
