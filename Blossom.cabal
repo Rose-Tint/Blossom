@@ -39,7 +39,8 @@ library BlossomLib
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
-        Blossom.Parsing.Token
+        Blossom.Parsing.Token,
+        Blossom.Typing.Type
     other-modules:
         Paths_Blossom
     build-tool-depends:
