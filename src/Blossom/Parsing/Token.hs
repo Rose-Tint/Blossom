@@ -23,6 +23,9 @@ data Token
     | TokImport
     | TokFunc
     | TokData
+    | TokIf
+    | TokThen
+    | TokElse
     | TokEnd
     deriving (Show, Eq)
 
