@@ -7,7 +7,8 @@ import Options.Applicative
 
 
 data CmdLine = CmdLine {
-    cmdSourceFiles :: [FilePath]
+    cmdSourceFiles :: [FilePath],
+    cmdVerbose :: Bool
     }
 
 
@@ -22,3 +23,8 @@ cmdLineParserInfo = info
 cmdLineParser :: Parser CmdLine
 cmdLineParser = CmdLine
     <$> many (strArgument mempty)
+    <*> switch (
+        short 'v'
+        <> long "verbose"
+        <> help "Enable more detailed output"
+        )
