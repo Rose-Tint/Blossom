@@ -60,7 +60,14 @@ TopLevelExpr :: { TopLevelExpr }
     | DataDefinition { DataDef $1 }
 
 FunctionDefinition :: { Function }
-    : func small_id "::" Params "=>" Expr ";" { Function (Just $2) $4 $6 }
+    : func small_id "::" Signature "=>" Expr ";"
+        { Function (Just $2) (fst $4) (snd $4) $6 }
+
+-- FuncSigAndBody :: { }
+
+Signature :: { ([Param], Type) }
+    : Params "->" Type { ($1, $3) }
+    | Type { ([], $1) }
 
 Params :: { [Param] }
     : Params_ { reverse $1}
@@ -75,7 +82,7 @@ Param :: { Param }
 
 Expr :: { Expr }
     : Term { $1 }
-    | Params "=>" Expr { mkLambda $1 $3 }
+    | Signature "=>" Expr { mkLambda (fst $1) (snd $1) $3 }
     | if Term then Expr else Expr { IfElse $2 $4 $6 }
 
 Term :: { Expr }

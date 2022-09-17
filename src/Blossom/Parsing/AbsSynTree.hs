@@ -27,8 +27,13 @@ data TopLevelExpr
     | DataDef Data
 
 data Function = Function {
+    -- | Name of the function. `@Nothing@` represents a lambda.
     funcName :: Maybe LLVM.Name,
+    -- | Parameters that the function takes.
     funcParams :: [Param],
+    -- | Return type of the function.
+    funcReturn :: Type,
+    -- | The body of the function.
     funcBody :: Expr
     }
 
@@ -54,5 +59,5 @@ data Constructor = Constructor {
     }
 
 
-mkLambda :: [Param] -> Expr -> Expr
-mkLambda params = Lambda . Function Nothing params
+mkLambda :: [Param] -> Type -> Expr -> Expr
+mkLambda params ret = Lambda . Function Nothing params ret
