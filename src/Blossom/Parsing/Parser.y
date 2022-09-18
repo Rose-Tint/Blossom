@@ -61,7 +61,7 @@ TopLevelExpr :: { TopLevelExpr }
 
 FunctionDefinition :: { Function }
     : func small_id "::" Signature "=>" Expr ";"
-        { Function (Just $2) (fst $4) (snd $4) $6 }
+        { Function $2 (fst $4) (snd $4) $6 }
 
 -- FuncSigAndBody :: { }
 
@@ -82,7 +82,7 @@ Param :: { Param }
 
 Expr :: { Expr }
     : Term { $1 }
-    | Signature "=>" Expr { mkLambda (fst $1) (snd $1) $3 }
+    | Signature "=>" Expr { Lambda (fst $1) (snd $1) $3 }
     | if Term then Expr else Expr { IfElse $2 $4 $6 }
 
 Term :: { Expr }

@@ -7,7 +7,6 @@ module Blossom.Parsing.AbsSynTree (
     Expr(..),
     Data(..),
     Constructor(..),
-    mkLambda,
 ) where
 
 import qualified LLVM.AST as LLVM
@@ -27,11 +26,12 @@ data TopLevelExpr
     | DataDef Data
 
 data Function = Function {
-    -- | Name of the function. `@Nothing@` represents a lambda.
-    funcName :: Maybe LLVM.Name,
+    -- | Name of the function.
+    funcName :: LLVM.Name,
     -- | Parameters that the function takes.
     funcParams :: [Param],
-    -- | Return type of the function.
+    -- | Return type of the function, written as the last
+    -- type in a type signature
     funcReturn :: Type,
     -- | The body of the function.
     funcBody :: Expr
@@ -45,7 +45,11 @@ data Param = Param {
 data Expr
     = VarExpr LLVM.Name
     | FuncApp Expr Expr
-    | Lambda Function
+    | Lambda {
+        exprParams :: [Param],
+        exprReturn :: Type,
+        exprBody :: Expr
+    }
     | IfElse Expr Expr Expr
 
 data Data = Data {
@@ -57,7 +61,3 @@ data Constructor = Constructor {
     ctorName :: LLVM.Name,
     ctorParams :: [Param]
     }
-
-
-mkLambda :: [Param] -> Type -> Expr -> Expr
-mkLambda params ret = Lambda . Function Nothing params ret
