@@ -41,6 +41,7 @@ library BlossomLib
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
         Blossom.Parsing.Token,
+        Blossom.Rename,
         Blossom.Typing.Type
     other-modules:
         Paths_Blossom
@@ -51,7 +52,8 @@ library BlossomLib
         array                >= 0.5.4,
         bytestring           >= 0.10.12,
         -- llvm-hs-pure         >= 9.0.0,
-        optparse-applicative >= 0.17.0.0
+        mtl                  >= 2.2.2,
+        optparse-applicative >= 0.17.0
     hs-source-dirs: src
 
 executable Blossom

@@ -3,12 +3,12 @@ module Blossom.Common.Name (
     mkName,
 ) where
 
-import Data.ByteString.Short (ShortByteString)
+import Data.ByteString (ByteString)
 import Data.String (IsString(fromString))
 
 
 data Name
-    = Name ShortByteString
+    = Name ByteString
     | Id Word
     deriving (Show, Eq, Ord)
 
