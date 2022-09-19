@@ -5,16 +5,17 @@ module Blossom.Parsing.Token (
 ) where
 
 import qualified Data.ByteString.Lazy as BS
-import qualified LLVM.AST.Name as LLVM
+
+import Blossom.Common.Name (Name, mkName)
 
 
 data Token
     = TokInteger Int
     | TokFloat Double
     | TokString BS.ByteString
-    | TokOperator LLVM.Name
-    | TokSmallId LLVM.Name
-    | TokBigId LLVM.Name
+    | TokOperator Name
+    | TokSmallId Name
+    | TokBigId Name
     | TokSemi
     | TokColon
     | TokDoubleColon
@@ -36,9 +37,9 @@ data Token
 
 -- | Creates a `@TokSmallId@` using a `@String@`
 mkSmallId :: String -> Token
-mkSmallId = TokSmallId . LLVM.mkName
+mkSmallId = TokSmallId . mkName
 
 -- | Creates a `@TokBigId@` using a `@String@`
 mkBigId :: String -> Token
-mkBigId = TokBigId . LLVM.mkName
+mkBigId = TokBigId . mkName
 

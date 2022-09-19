@@ -2,12 +2,12 @@ module Blossom.Typing.Type (
     Type(..),
 ) where
 
-import qualified LLVM.AST as LLVM
+import Blossom.Common.Name (Name)
 
 
 data Type
     = TypeCon {
-        typeName :: LLVM.Name,
+        typeName :: Name,
         typeArgs :: [Type]
     }
     -- TODO: Type variables

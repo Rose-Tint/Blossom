@@ -36,6 +36,7 @@ library BlossomLib
     exposed-modules:
         Blossom.Cmd,
         Blossom.CodeGen,
+        Blossom.Common.Name,
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
@@ -49,7 +50,7 @@ library BlossomLib
     build-depends:
         array                >= 0.5.4,
         bytestring           >= 0.10.12,
-        llvm-hs-pure         >= 9.0.0,
+        -- llvm-hs-pure         >= 9.0.0,
         optparse-applicative >= 0.17.0.0
     hs-source-dirs: src
 
