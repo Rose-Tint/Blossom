@@ -53,9 +53,7 @@ tokens :-
     "import"                { reserved TokImport }
     "func"                  { reserved TokFunc }
     "data"                  { reserved TokData }
-    "if"                    { reserved TokIf }
-    "then"                  { reserved TokThen }
-    "else"                  { reserved TokElse }
+    "match"                 { reserved TokMatch }
 
 
 -- this lets the error messaging give a the proper position

@@ -12,6 +12,7 @@ module Blossom.Parsing.AbsSynTree (
 import qualified LLVM.AST as LLVM
 
 import Blossom.Typing.Type
+import Data.Int (Int64)
 
 
 data ModuleAST = ModuleAST {
@@ -38,19 +39,21 @@ data Function = Function {
     }
 
 data Param = Param {
-    paramName :: Maybe LLVM.Name,
+    paramName :: LLVM.Name,
     paramType :: Type
     }
 
 data Expr
     = VarExpr LLVM.Name
+    | IntExpr Int64
+    | FloatExpr Double
     | FuncApp Expr Expr
     | Lambda {
         exprParams :: [Param],
         exprReturn :: Type,
         exprBody :: Expr
     }
-    | IfElse Expr Expr Expr
+    | Match Expr [(Expr, Expr)]
 
 data Data = Data {
     dataName :: LLVM.Name,
