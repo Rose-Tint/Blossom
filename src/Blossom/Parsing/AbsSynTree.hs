@@ -11,6 +11,7 @@ module Blossom.Parsing.AbsSynTree (
 
 import Blossom.Typing.Type (Type)
 import Blossom.Common.Name (Name)
+import Data.Int (Int64)
 
 
 data ModuleAST = ModuleAST {
@@ -43,13 +44,15 @@ data Param = Param {
 
 data Expr
     = VarExpr Name
+    | IntExpr Int64
+    | FloatExpr Double
     | FuncApp Expr Expr
     | Lambda {
         exprParams :: [Param],
         exprReturn :: Type,
         exprBody :: Expr
     }
-    | IfElse Expr Expr Expr
+    | Match Expr [(Expr, Expr)]
 
 data Data = Data {
     dataName :: Name,

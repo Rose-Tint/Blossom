@@ -4,13 +4,14 @@ module Blossom.Parsing.Token (
     mkBigId,
 ) where
 
+import Data.Int (Int64)
 import qualified Data.ByteString.Lazy as BS
 
 import Blossom.Common.Name (Name, mkName)
 
 
 data Token
-    = TokInteger Int
+    = TokInteger Int64
     | TokFloat Double
     | TokString BS.ByteString
     | TokOperator Name
@@ -28,9 +29,7 @@ data Token
     | TokImport
     | TokFunc
     | TokData
-    | TokIf
-    | TokThen
-    | TokElse
+    | TokMatch
     | TokEnd
     deriving (Show, Eq)
 

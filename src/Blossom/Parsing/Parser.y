@@ -35,9 +35,7 @@ import Blossom.Typing.Type
     import                  { TokImport }
     func                    { TokFunc }
     data                    { TokData }
-    if                      { TokIf }
-    then                    { TokThen }
-    else                    { TokElse }
+    match                   { TokMatch }
 
 %%
 
@@ -60,10 +58,8 @@ TopLevelExpr :: { TopLevelExpr }
     | DataDefinition { DataDef $1 }
 
 FunctionDefinition :: { Function }
-    : func small_id "::" Signature "=>" Expr ";"
-        { Function $2 (fst $4) (snd $4) $6 }
-
--- FuncSigAndBody :: { }
+    : func small_id "::" Signature StmtAssignment
+        { Function $2 (fst $4) (snd $4) $5 }
 
 Signature :: { ([Param], Type) }
     : Params "->" Type { ($1, $3) }
@@ -74,22 +70,34 @@ Params :: { [Param] }
 
 Params_ :: { [Param] }
     : Params_ Param { ($2:$1) }
-    | Type { [Param Nothing $1] }
+    | Param { [$1] }
 
 Param :: { Param }
-    : small_id ":" Type { Param (Just $1) $3 }
-    | Type { Param Nothing $1 }
+    : small_id ":" Type { Param $1 $3 }
+
+StmtAssignment :: { Expr }
+    : Assignment ";" { $1 }
+
+Assignment :: { Expr }
+    : "=>" Expr { $2 }
 
 Expr :: { Expr }
     : Term { $1 }
-    | Signature "=>" Expr { Lambda (fst $1) (snd $1) $3 }
-    | if Term then Expr else Expr { IfElse $2 $4 $6 }
+    | Signature Assignment { Lambda (fst $1) (snd $1) $2 }
+    | match Term "{" MatchCases "}" { Match $2 $4 }
 
 Term :: { Expr }
     : small_id { VarExpr $1 }
     | big_id { VarExpr $1 }
     | Term Term { FuncApp $1 $2 }
     | "(" Expr ")" { $2 }
+
+MatchCases :: { [(Expr, Expr)] }
+    : MatchCases MatchCase { ($2:$1) }
+    | MatchCase { [$1] }
+
+MatchCase :: { (Expr, Expr) }
+    : Term StmtAssignment { ($1, $2) }
 
 Type :: { Type }
     : big_id Types0 { TypeCon $1 $2 }
