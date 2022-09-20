@@ -1,14 +1,20 @@
 module Blossom.Cmd (
     CmdLine(..),
+    Backend(..),
     parseCmdLine,
 ) where
 
 import Options.Applicative
 
 
+data Backend
+    = Cpp
+    | LLVM
+
 data CmdLine = CmdLine {
     cmdSourceFiles :: [FilePath],
-    cmdVerbose :: Bool
+    cmdVerbose :: Bool,
+    cmdBackend :: Backend
     }
 
 
@@ -22,9 +28,13 @@ cmdLineParserInfo = info
 
 cmdLineParser :: Parser CmdLine
 cmdLineParser = CmdLine
-    <$> many (strArgument mempty)
+    <$> some (strArgument mempty)
     <*> switch (
-        short 'v'
-        <> long "verbose"
-        <> help "Enable more detailed output"
+            short 'v'
+            <> long "verbose"
+            <> help "Enable more detailed output"
+        )
+    <*> flag LLVM Cpp (
+            long "cpp"
+            <> help "Use C++ as the backend (transpile to C++)"
         )
