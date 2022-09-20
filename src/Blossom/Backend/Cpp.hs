@@ -2,13 +2,20 @@ module Blossom.Backend.Cpp (
     transpileFile,
 ) where
 
-import qualified Data.ByteString.Short as BS (fromShort)
 import qualified Data.ByteString.Char8 as BS (unpack)
-import qualified LLVM.AST.Name as LLVM
 import Data.List (intercalate)
 
-import Blossom.Parsing.AbsSynTree
-import Blossom.Typing.Type
+import Blossom.Common.Name
+import Blossom.Parsing.AbsSynTree (
+    Constructor(Constructor, ctorName),
+    Data(Data),
+    Expr(Match, VarExpr, IntExpr, FloatExpr, FuncApp, Lambda),
+    Param(Param),
+    Function(Function),
+    TopLevelExpr(..),
+    Import(..),
+    ModuleAST(ModuleAST) )
+import Blossom.Typing.Type (Type(..))
 import Blossom.Parsing.Lexer (runAlex)
 import Blossom.Parsing.Parser (blossomParser)
 import qualified Data.ByteString.Lazy as ByteString
@@ -96,6 +103,6 @@ instance Cpp Expr where
             params' = intercalate ", " (map toCpp params)
     toCpp (Match _value _cases) = error "match cases not yet supported"
 
-instance Cpp LLVM.Name where
-    toCpp (LLVM.Name name) = BS.unpack (BS.fromShort name)
-    toCpp (LLVM.UnName wrd) = "_" ++ show wrd
+instance Cpp Name where
+    toCpp (Name name) = BS.unpack name
+    toCpp (Id n) = "_" ++ show n

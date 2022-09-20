@@ -37,7 +37,6 @@ library BlossomLib
         Blossom.Backend.Cpp,
         Blossom.Backend.LLVM,
         Blossom.Cmd,
-        Blossom.CodeGen,
         Blossom.Common.Name,
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,

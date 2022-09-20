@@ -38,7 +38,7 @@ data Function = Function {
     }
 
 data Param = Param {
-    paramName :: Maybe Name,
+    paramName :: Name,
     paramType :: Type
     }
 
