@@ -9,9 +9,8 @@ module Blossom.Parsing.AbsSynTree (
     Constructor(..),
 ) where
 
-import qualified LLVM.AST as LLVM
-
-import Blossom.Typing.Type
+import Blossom.Typing.Type (Type)
+import Blossom.Common.Name (Name)
 import Data.Int (Int64)
 
 
@@ -20,7 +19,7 @@ data ModuleAST = ModuleAST {
     moduleTopExprs :: [TopLevelExpr]
     }
 
-newtype Import = Import LLVM.Name
+newtype Import = Import Name
 
 data TopLevelExpr
     = FuncDef Function
@@ -28,7 +27,7 @@ data TopLevelExpr
 
 data Function = Function {
     -- | Name of the function.
-    funcName :: LLVM.Name,
+    funcName :: Name,
     -- | Parameters that the function takes.
     funcParams :: [Param],
     -- | Return type of the function, written as the last
@@ -39,12 +38,12 @@ data Function = Function {
     }
 
 data Param = Param {
-    paramName :: LLVM.Name,
+    paramName :: Maybe Name,
     paramType :: Type
     }
 
 data Expr
-    = VarExpr LLVM.Name
+    = VarExpr Name
     | IntExpr Int64
     | FloatExpr Double
     | FuncApp Expr Expr
@@ -56,11 +55,11 @@ data Expr
     | Match Expr [(Expr, Expr)]
 
 data Data = Data {
-    dataName :: LLVM.Name,
+    dataName :: Name,
     dataCtors :: [Constructor]
     }
 
 data Constructor = Constructor {
-    ctorName :: LLVM.Name,
+    ctorName :: Name,
     ctorParams :: [Param]
     }

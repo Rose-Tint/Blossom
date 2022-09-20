@@ -14,9 +14,9 @@ import Data.Char (digitToInt)
 import qualified Data.ByteString.Lazy.Char8 as CharByteString
 import qualified Data.ByteString.Short as ShortByteString
 -- import qualified Data.ByteString.Lazy as ByteString -- imported by Alex
-import qualified LLVM.AST.Name as LLVM
 
 import Blossom.Parsing.Token
+import Blossom.Common.Name (mkName)
 }
 
 %wrapper "monadUserState-bytestring"
@@ -100,11 +100,11 @@ string (_pos, _prev, input, _) len = return $ TokString $
 
 smallId :: AlexInput -> Int64 -> Alex Token
 smallId (_pos, _prev, input, _) len = return $ TokSmallId $
-    LLVM.mkName (CharByteString.unpack (ByteString.take len input))
+    mkName (CharByteString.unpack (ByteString.take len input))
 
 bigId :: AlexInput -> Int64 -> Alex Token
 bigId (_pos, _prev, input, _) len = return $ TokBigId $
-    LLVM.mkName (CharByteString.unpack (ByteString.take len input))
+    mkName (CharByteString.unpack (ByteString.take len input))
 
 reserved :: Token -> AlexInput -> Int64 -> Alex Token
 reserved tok (_pos, _prev, _input, _) _len = return tok
