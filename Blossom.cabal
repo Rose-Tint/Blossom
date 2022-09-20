@@ -34,8 +34,9 @@ library BlossomLib
     import:
         base-depends
     exposed-modules:
+        Blossom.Backend.Cpp,
+        Blossom.Backend.LLVM,
         Blossom.Cmd,
-        Blossom.CodeGen,
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
@@ -70,7 +71,6 @@ test-suite Test
     main-is: app/Test.hs
     other-modules:
         Blossom.CmdTest,
-        Blossom.CodeGenTest,
         Blossom.Parsing.LexerTest,
         Blossom.Parsing.ParserTest
     hs-source-dirs:
