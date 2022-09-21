@@ -9,6 +9,8 @@ module Blossom.Parsing.AbsSynTree (
     Constructor(..),
 ) where
 
+import qualified Data.ByteString.Lazy as BS
+
 import Blossom.Typing.Type (Type)
 import Blossom.Common.Name (Name)
 import Data.Int (Int64)
@@ -46,6 +48,7 @@ data Expr
     = VarExpr Name
     | IntExpr Int64
     | FloatExpr Double
+    | StringExpr BS.ByteString
     | FuncApp Expr Expr
     | Lambda {
         exprParams :: [Param],

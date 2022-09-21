@@ -6,8 +6,10 @@ module Blossom.Parsing.Lexer (
     Alex(..),
     runAlex,
     alexError,
+    alexGetInput,
     lexer,
     tokenize,
+    getPrettyAlexPosn,
 ) where
 
 import Data.Char (digitToInt)
@@ -25,22 +27,17 @@ $digit              = [0-9]
 $small              = [a-z\_]
 $big                = [A-Z]
 $id_char            = [a-zA-Z0-9\_\']
+$symbol             = [\!\#\$\%\&\*\+\.\/\<\=\>\?\@\\\^\|\-\~]
 
-@comment            = "--" .*
+@comment            = "--"\-*[^symbol].*
 @integer            = $digit+
 @float              = $digit+ \. $digit+
 @string             = \" [^\"]* \"
 @small_id           = $small $id_char*
 @big_id             = $big $id_char*
+@operator           = $symbol [$symbol \:]*
 
 tokens :-
-    $white+                 { skip }
-    @comment+               { skip }
-    @integer                { integer }
-    @float                  { float }
-    @string                 { string }
-    @small_id               { smallId }
-    @big_id                 { bigId }
     ";"                     { reserved TokSemi }
     ":"                     { reserved TokColon }
     "::"                    { reserved TokDoubleColon }
@@ -54,6 +51,14 @@ tokens :-
     "func"                  { reserved TokFunc }
     "data"                  { reserved TokData }
     "match"                 { reserved TokMatch }
+    $white+                 { skip }
+    @comment+               { skip }
+    @integer                { integer }
+    @float                  { float }
+    @string                 { string }
+    @small_id               { smallId }
+    @big_id                 { bigId }
+    @operator               { operator }
 
 
 -- this lets the error messaging give a the proper position
@@ -106,6 +111,10 @@ bigId :: AlexInput -> Int64 -> Alex Token
 bigId (_pos, _prev, input, _) len = return $ TokBigId $
     mkName (CharByteString.unpack (ByteString.take len input))
 
+operator :: AlexInput -> Int64 -> Alex Token
+operator (_pos, _prev, input, _) len = return $ TokOperator $
+    mkName (CharByteString.unpack (ByteString.take len input))
+
 reserved :: Token -> AlexInput -> Int64 -> Alex Token
 reserved tok (_pos, _prev, _input, _) _len = return tok
 
@@ -125,4 +134,14 @@ tokenize bs = runAlex bs tokenizer
             else do
                 toks <- tokenizer
                 return (tok:toks)
+
+getPrettyAlexPosn :: Alex String
+getPrettyAlexPosn = do
+    ((AlexPn _off ln col), _, _, _) <- alexGetInput
+    return $! "line " ++ show ln ++ ", column " ++ show col
+
+lexError :: Alex a
+lexError = do
+    posStr <- getPrettyAlexPosn
+    alexError $ "Lexical error on " ++ posStr
 }

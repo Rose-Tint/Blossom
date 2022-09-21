@@ -37,6 +37,10 @@ import Blossom.Typing.Type
     data                    { TokData }
     match                   { TokMatch }
 
+-- ghost precedence for function application
+-- https://stackoverflow.com/questions/27630269
+%nonassoc APP
+
 %%
 
 Module :: { ModuleAST }
@@ -69,7 +73,7 @@ Params :: { [Param] }
     : Params_ { reverse $1}
 
 Params_ :: { [Param] }
-    : Params_ Param { ($2:$1) }
+    : Params_ "->" Param { ($3:$1) }
     | Param { [$1] }
 
 Param :: { Param }
@@ -83,13 +87,17 @@ Assignment :: { Expr }
 
 Expr :: { Expr }
     : Term { $1 }
-    | Signature Assignment { Lambda (fst $1) (snd $1) $2 }
+    | Term operator Term { FuncApp (FuncApp (VarExpr $2) $1) $3 }
+    -- | Signature Assignment { Lambda (fst $1) (snd $1) $2 }
     | match Term "{" MatchCases "}" { Match $2 $4 }
 
 Term :: { Expr }
     : small_id { VarExpr $1 }
     | big_id { VarExpr $1 }
-    | Term Term { FuncApp $1 $2 }
+    | integer { IntExpr $1 }
+    | float { FloatExpr $1 }
+    | string { StringExpr $1 }
+    | Term Term %prec APP { FuncApp $1 $2 }
     | "(" Expr ")" { $2 }
 
 MatchCases :: { [(Expr, Expr)] }
@@ -100,7 +108,7 @@ MatchCase :: { (Expr, Expr) }
     : Term StmtAssignment { ($1, $2) }
 
 Type :: { Type }
-    : big_id Types0 { TypeCon $1 $2 }
+    : big_id Types0 %prec APP { TypeCon $1 $2 }
     | "(" Type ")" { $2 }
 
 Types0 :: { [Type] }
@@ -120,10 +128,13 @@ Constructors :: { [Constructor] }
 
 Constructor :: { Constructor }
     : big_id "::" Params ";" { Constructor $1 $3 }
-    | big_id { Constructor $1 [] }
+    | big_id ";" { Constructor $1 [] }
 
 
 {
 parseError :: Token -> Alex a
-parseError _tok = alexError "Error while parsing"
+parseError tok = do
+    posStr <- getPrettyAlexPosn
+    alexError $ "Error parsing token on " ++ posStr
+        ++ "\n    Unexpected token: `" ++ show tok ++ "`"
 }
