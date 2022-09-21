@@ -14,8 +14,8 @@
         "isDefault": true
       },
       "type": "shell",
-      "label": "Run",
-      "command": "cabal v2-run Blossom"
+      "label": "Run with C++ backend",
+      "command": "cabal v2-run Blossom -- example/IntTree.bl --cpp"
     },
     {
       "group": {
@@ -52,7 +52,8 @@
       "group": "none",
       "type": "shell",
       "label": "Happy info",
-      "command": "happy src/Blossom/Parsing/Parser.y -i -s -g -c -a; rm ./src/Blossom/Parsing/Parser.hs"
+      "command": "happy src/Blossom/Parsing/Parser.y -d -i -s -g -c -a; rm ./src/Blossom/Parsing/Parser.hs",
+      "problemMatcher": []
     }
   ]
 }

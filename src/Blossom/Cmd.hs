@@ -13,8 +13,8 @@ data Backend
 
 data CmdLine = CmdLine {
     cmdSourceFiles :: [FilePath],
-    cmdVerbose :: Bool,
-    cmdBackend :: Backend
+    cmdBackend :: Backend,
+    cmdVerbose :: Bool
     }
 
 
@@ -28,13 +28,15 @@ cmdLineParserInfo = info
 
 cmdLineParser :: Parser CmdLine
 cmdLineParser = CmdLine
-    <$> some (strArgument mempty)
+    <$> many (strArgument (
+            metavar "files"
+        ))
+    <*> flag LLVM Cpp (
+            long "cpp"
+            <> help "Use C++ as the backend (transpile to C++)"
+        )
     <*> switch (
             short 'v'
             <> long "verbose"
             <> help "Enable more detailed output"
-        )
-    <*> flag LLVM Cpp (
-            long "cpp"
-            <> help "Use C++ as the backend (transpile to C++)"
         )
