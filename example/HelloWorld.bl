@@ -1,6 +1,0 @@
-import Array;
-import IO;
-
-func main :: args: Array String -> IO I32
-    => printStr "Hello, World!"
-        >> exit 0;

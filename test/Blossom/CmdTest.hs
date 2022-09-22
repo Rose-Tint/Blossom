@@ -9,7 +9,4 @@ import Test.HUnit
 
 tests :: Test
 tests = TestLabel "Blossom.Cmd" $ TestList [
-    TestLabel "parseCmdLine" $ TestList [
-        -- TestCase $ parseCmdLine ~=?
-        ]
     ]

@@ -75,7 +75,8 @@ test-suite Test
     other-modules:
         Blossom.CmdTest,
         Blossom.Parsing.LexerTest,
-        Blossom.Parsing.ParserTest
+        Blossom.Parsing.ParserTest,
+        Blossom.RenameTest
     hs-source-dirs:
         ./,
         test
