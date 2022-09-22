@@ -4,6 +4,7 @@ module Blossom.Typing.Type (
 
 import Blossom.Common.Name (Name)
 
+infixr 9 :->
 
 data Type
     = TypeCon {
@@ -12,3 +13,4 @@ data Type
     }
     -- TODO: Type variables
     | Type :-> Type
+    deriving (Show, Eq)

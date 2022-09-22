@@ -1,9 +1,7 @@
 {
 module Blossom.Parsing.Parser (
-    blossomParser,
+    parse,
 ) where
-
-import qualified Data.List.NonEmpty as NE
 
 import Blossom.Common.Name (Name)
 import Blossom.Parsing.AbsSynTree (
@@ -18,12 +16,14 @@ import Blossom.Parsing.AbsSynTree (
     )
 import Blossom.Parsing.Lexer (
     Alex,
+    runAlex,
     lexer,
     getPrettyAlexPosn,
     alexError,
     )
 import Blossom.Parsing.Token (Token(..))
 import Blossom.Typing.Type (Type(..))
+import Data.ByteString.Lazy (ByteString)
 }
 
 
@@ -188,4 +188,7 @@ parseError tok = do
     posStr <- getPrettyAlexPosn
     alexError $ "Error parsing token on " ++ posStr
         ++ "\n    Unexpected token: `" ++ show tok ++ "`"
+
+parse :: ByteString -> Either String ModuleAST
+parse = flip runAlex blossomParser
 }

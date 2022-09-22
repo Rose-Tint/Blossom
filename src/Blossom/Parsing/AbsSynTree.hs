@@ -20,17 +20,21 @@ data ModuleAST = ModuleAST {
     moduleImports :: [Import],
     moduleTopExprs :: [TopLevelExpr]
     }
+    deriving (Show, Eq)
 
 newtype Import = Import Name
+    deriving (Show, Eq)
 
 data TopLevelExpr
     = FuncDecl Name Type
     | FuncDef Name Params Expr
     | DataDef Name [Constructor]
+    deriving (Show, Eq)
 
 data Pattern
     = Param Name
     | CtorPtrn Name [Pattern]
+    deriving (Show, Eq)
 
 type Params = [Pattern]
 
@@ -51,8 +55,10 @@ data Expr
     | Lambda [Pattern] Expr
     | Match Expr [Case]
     | TypedExpr Expr Type
+    deriving (Show, Eq)
 
 data Case = Case Pattern Expr
+    deriving (Show, Eq)
 
 data Constructor
     = Constructor {
@@ -62,3 +68,4 @@ data Constructor
     | Nullary {
         ctorName :: Name
     }
+    deriving (Show, Eq)
