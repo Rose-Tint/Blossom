@@ -13,8 +13,8 @@ module Blossom.Parsing.Lexer (
 ) where
 
 import Data.Char (digitToInt)
-import qualified Data.ByteString.Lazy.Char8 as CharByteString
-import qualified Data.ByteString.Short as ShortByteString
+import qualified Data.ByteString.Lazy.Char8 as CBS
+-- import qualified Data.ByteString.Short as ByteString
 -- import qualified Data.ByteString.Lazy as ByteString -- imported by Alex
 
 import Blossom.Parsing.Token
@@ -27,21 +27,25 @@ $digit              = [0-9]
 $small              = [a-z\_]
 $big                = [A-Z]
 $id_char            = [a-zA-Z0-9\_\']
-$symbol             = [\!\#\$\%\&\*\+\.\/\<\=\>\?\@\\\^\|\-\~]
+$symbol             = [\!\#\$\%\&\*\+\.\/\<\=\>\?\@\^\|\-\~]
 
-@comment            = "--"\-*[^symbol].*
+@comment            = "--"\-*[^$symbol].*
 @integer            = $digit+
 @float              = $digit+ \. $digit+
+@char               = \' \\ [abfnrtv\\\'\"] \'
+                    | \' [^\'\\] \'
 @string             = \" [^\"]* \"
 @small_id           = $small $id_char*
 @big_id             = $big $id_char*
 @operator           = $symbol [$symbol \:]*
 
 tokens :-
+    "\\"                    { reserved TokBackslash }
     ";"                     { reserved TokSemi }
     ":"                     { reserved TokColon }
     "::"                    { reserved TokDoubleColon }
     "->"                    { reserved TokArrow }
+    "="                     { reserved TokEquals }
     "=>"                    { reserved TokEqArrow }
     "("                     { reserved TokLParen }
     ")"                     { reserved TokRParen }
@@ -55,13 +59,14 @@ tokens :-
     @comment+               { skip }
     @integer                { integer }
     @float                  { float }
+    @char                   { char }
     @string                 { string }
     @small_id               { smallId }
     @big_id                 { bigId }
     @operator               { operator }
 
 
--- this lets the error messaging give a the proper position
+-- strange placement makes error message positions from Alex accurate
 {alexEOF :: Alex Token
 alexEOF = return TokEnd
 
@@ -78,7 +83,7 @@ alexEOF = return TokEnd
 --     AlexPosn,                 -- current position,
 --     Char,                     -- previous char
 --     ByteString.ByteString,    -- current input string
---     Int64                     -- ?
+--     Int64                     -- bytes consumed so far
 --     )
 
 data AlexUserState = AlexUserState
@@ -89,31 +94,35 @@ alexInitUserState = AlexUserState
 
 
 integer :: AlexInput -> Int64 -> Alex Token
-integer (_pos, _prev, input, _) len = return $ TokInteger $
-    CharByteString.foldl' (\n ch ->
+integer (_pos, _prev, input, _cons) len = return $ TokInteger $
+    CBS.foldl' (\n ch ->
         n * 10 + fromIntegral (digitToInt ch)
         ) 0 (ByteString.take len input)
 
 float :: AlexInput -> Int64 -> Alex Token
-float (_pos, _prev, input, _) len = return $ TokFloat $
-    read (CharByteString.unpack (ByteString.take len input))
+float (_pos, _prev, input, _cons) len = return $ TokFloat $
+    read (CBS.unpack (ByteString.take len input))
+
+char :: AlexInput -> Int64 -> Alex Token
+char (_pos, _prev, input, _cons) len = return $ TokChar
+    (read (CBS.unpack $ ByteString.take len input) :: Char)
 
 string :: AlexInput -> Int64 -> Alex Token
-string (_pos, _prev, input, _) len = return $ TokString $
+string (_pos, _prev, input, _cons) len = return $ TokString $
     -- drop quotation marks
     ByteString.drop 1 (ByteString.take (len - 1) input)
 
 smallId :: AlexInput -> Int64 -> Alex Token
-smallId (_pos, _prev, input, _) len = return $ TokSmallId $
-    mkName (CharByteString.unpack (ByteString.take len input))
+smallId (_pos, _prev, input, _cons) len = return $ TokSmallId $
+    mkName (CBS.unpack (ByteString.take len input))
 
 bigId :: AlexInput -> Int64 -> Alex Token
-bigId (_pos, _prev, input, _) len = return $ TokBigId $
-    mkName (CharByteString.unpack (ByteString.take len input))
+bigId (_pos, _prev, input, _cons) len = return $ TokBigId $
+    mkName (CBS.unpack (ByteString.take len input))
 
 operator :: AlexInput -> Int64 -> Alex Token
-operator (_pos, _prev, input, _) len = return $ TokOperator $
-    mkName (CharByteString.unpack (ByteString.take len input))
+operator (_pos, _prev, input, _cons) len = return $ TokOperator $
+    mkName (CBS.unpack (ByteString.take len input))
 
 reserved :: Token -> AlexInput -> Int64 -> Alex Token
 reserved tok (_pos, _prev, _input, _) _len = return tok
@@ -122,7 +131,7 @@ lexer :: (Token -> Alex a) -> Alex a
 lexer = (alexMonadScan >>=)
 
 -- | Turns a bytestring into either an error message (`@Left@`), or
--- a list of tokens.
+-- a list of tokens. This should really only be used for testing.
 tokenize :: ByteString.ByteString -> Either String [Token]
 tokenize bs = runAlex bs tokenizer
     where

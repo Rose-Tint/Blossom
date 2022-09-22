@@ -3,6 +3,9 @@ module Blossom.Parsing.Parser (
     blossomParser,
 ) where
 
+import qualified Data.List.NonEmpty as NE
+
+import Blossom.Common.Name
 import Blossom.Parsing.AbsSynTree
 import Blossom.Parsing.Lexer
 import Blossom.Parsing.Token
@@ -14,6 +17,7 @@ import Blossom.Typing.Type
 %error { parseError }
 %lexer { lexer } { TokEnd }
 %monad { Alex }
+-- %expect
 
 %tokentype { Token }
 %token
@@ -23,10 +27,12 @@ import Blossom.Typing.Type
     operator                { TokOperator $$ }
     small_id                { TokSmallId $$ }
     big_id                  { TokBigId $$ }
+    "\\"                    { TokBackslash }
     ";"                     { TokSemi }
     ":"                     { TokColon }
-    "::"                    { TokDoubleColon }
+    -- "::"                    { TokDoubleColon }
     "->"                    { TokArrow }
+    "="                     { TokEquals }
     "=>"                    { TokEqArrow }
     "("                     { TokLParen }
     ")"                     { TokRParen }
@@ -36,6 +42,11 @@ import Blossom.Typing.Type
     func                    { TokFunc }
     data                    { TokData }
     match                   { TokMatch }
+
+-- PLEASE NOTE: If function application is not as expected,
+-- please remove the following precedence declaration.
+-- It did turned 12 s/r conflicts into reduces for FuncApp.
+%nonassoc integer float string small_id big_id "(" "->"
 
 -- ghost precedence for function application
 -- https://stackoverflow.com/questions/27630269
@@ -58,37 +69,54 @@ TopLevel :: { [TopLevelExpr] }
     | {- EMPTY -} { [] }
 
 TopLevelExpr :: { TopLevelExpr }
-    : FunctionDefinition { FuncDef $1 }
-    | DataDefinition { DataDef $1 }
+    : FuncDecl { $1}
+    | FuncDef { $1 }
+    | DataDefinition { $1 }
 
-FunctionDefinition :: { Function }
-    : func small_id "::" Signature StmtAssignment
-        { Function $2 (fst $4) (snd $4) $5 }
+-- | The part that prefixes both function
+-- declarations *and* definitions
+-- TODO: abstract `small_id` and `operator` to one.
+FuncOpener :: { Name }
+    : func small_id { $2 }
+    | func "(" operator ")" { $3 }
 
-Signature :: { ([Param], Type) }
-    : Params "->" Type { ($1, $3) }
-    | Type { ([], $1) }
+FuncDecl :: { TopLevelExpr }
+    : FuncOpener SigWithSemi { FuncDecl $1 $2 }
 
-Params :: { [Param] }
+FuncDef :: { TopLevelExpr }
+    : FuncOpener Params StmtAssignment { FuncDef $1 $2 $3 }
+
+Signature :: { Type }
+    : ":" Type { $2 }
+
+-- | A type-signature that ends with a semicolon
+SigWithSemi :: { Type }
+    : Signature ";" { $1 }
+
+Params :: { Params }
     : Params_ { reverse $1}
 
-Params_ :: { [Param] }
-    : Params_ "->" Param { ($3:$1) }
-    | Param { [$1] }
+Params_ :: { Params }
+    : Params_ Pattern { ($2:$1) }
+    | Pattern { [$1] }
 
-Param :: { Param }
-    : small_id ":" Type { Param $1 $3 }
+Pattern :: { Pattern }
+    : small_id { Param $1 }
+    | "(" big_id Params ")" { CtorPtrn $2 $3 }
+
+Stmt :: { Expr }
+    : Expr ";" { $1 }
 
 StmtAssignment :: { Expr }
-    : Assignment ";" { $1 }
+    : "=" Stmt ";" { $2 }
 
-Assignment :: { Expr }
+Implication :: { Expr }
     : "=>" Expr { $2 }
 
 Expr :: { Expr }
     : Term { $1 }
-    | Term operator Term { FuncApp (FuncApp (VarExpr $2) $1) $3 }
-    -- | Signature Assignment { Lambda (fst $1) (snd $1) $2 }
+    | Term Signature { TypedExpr $1 $2 }
+    | "\\" Params Implication { Lambda $2 $3 }
     | match Term "{" MatchCases "}" { Match $2 $4 }
 
 Term :: { Expr }
@@ -97,29 +125,38 @@ Term :: { Expr }
     | integer { IntExpr $1 }
     | float { FloatExpr $1 }
     | string { StringExpr $1 }
-    | Term Term %prec APP { FuncApp $1 $2 }
+    | FuncApp { FuncApp $1 }
+    | "(" operator ")" { VarExpr $2 }
     | "(" Expr ")" { $2 }
 
-MatchCases :: { [(Expr, Expr)] }
+FuncApp :: { [Expr] }
+    : FuncApp_ %prec APP { reverse $1 }
+
+FuncApp_ :: { [Expr] }
+    : FuncApp_ Term %prec APP { ($2:$1) }
+    | Term Term %prec APP { [$2, $1] } -- backwards bc it gets reversed
+
+MatchCases :: { [Case] }
     : MatchCases MatchCase { ($2:$1) }
     | MatchCase { [$1] }
 
-MatchCase :: { (Expr, Expr) }
-    : Term StmtAssignment { ($1, $2) }
+MatchCase :: { Case }
+    : Pattern Implication ";" { Case $1 $2 }
 
 Type :: { Type }
-    : big_id Types0 %prec APP { TypeCon $1 $2 }
+    : big_id Types0 { TypeCon $1 $2 }
+    | Type "->" Type { $1 :-> $3 }
     | "(" Type ")" { $2 }
 
 Types0 :: { [Type] }
-    : Types0_ { reverse $1 }
+    : Types0_ %prec APP { reverse $1 }
 
 Types0_ :: { [Type] }
-    : Types0_ Type { ($2:$1) }
+    : Types0_ Type %prec APP { ($2:$1) }
     | {- EMPTY -} { [] }
 
-DataDefinition :: { Data }
-    : data big_id "{" Constructors "}" { Data $2 $4 }
+DataDefinition :: { TopLevelExpr }
+    : data big_id "{" Constructors "}" { DataDef $2 $4 }
 
 -- Order does not matter, so there is no need to use `@reverse@`
 Constructors :: { [Constructor] }
@@ -127,8 +164,8 @@ Constructors :: { [Constructor] }
     | {- EMPTY -} { [] }
 
 Constructor :: { Constructor }
-    : big_id "::" Params ";" { Constructor $1 $3 }
-    | big_id ";" { Constructor $1 [] }
+    : big_id SigWithSemi ";" { Constructor $1 $2 }
+    | big_id ";" { Nullary $1 }
 
 
 {

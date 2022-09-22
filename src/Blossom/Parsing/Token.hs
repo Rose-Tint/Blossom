@@ -2,6 +2,7 @@ module Blossom.Parsing.Token (
     Token(..),
     mkSmallId,
     mkBigId,
+    mkOperator,
 ) where
 
 import Data.Int (Int64)
@@ -14,6 +15,7 @@ data Token
     = TokInteger Int64
     | TokFloat Double
     | TokString BS.ByteString
+    | TokChar Char
     | TokOperator Name
     | TokSmallId Name
     | TokBigId Name
@@ -21,11 +23,13 @@ data Token
     | TokColon
     | TokDoubleColon
     | TokArrow
+    | TokEquals
     | TokEqArrow
     | TokLParen
     | TokRParen
     | TokLBrace
     | TokRBrace
+    | TokBackslash
     | TokImport
     | TokFunc
     | TokData
@@ -42,3 +46,6 @@ mkSmallId = TokSmallId . mkName
 mkBigId :: String -> Token
 mkBigId = TokBigId . mkName
 
+-- | Creates a `@TokOperator@` using a `@String@`
+mkOperator :: String -> Token
+mkOperator = TokOperator . mkName

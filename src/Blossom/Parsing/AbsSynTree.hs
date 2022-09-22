@@ -2,14 +2,15 @@ module Blossom.Parsing.AbsSynTree (
     ModuleAST(..),
     Import(..),
     TopLevelExpr(..),
-    Function(..),
-    Param(..),
+    Pattern(..),
     Expr(..),
-    Data(..),
     Constructor(..),
+    Case(..),
+    Params,
+    Param,
 ) where
 
-import qualified Data.ByteString.Lazy as BS
+import Data.ByteString.Lazy (ByteString)
 
 import Blossom.Typing.Type (Type)
 import Blossom.Common.Name (Name)
@@ -24,45 +25,41 @@ data ModuleAST = ModuleAST {
 newtype Import = Import Name
 
 data TopLevelExpr
-    = FuncDef Function
-    | DataDef Data
+    = FuncDecl Name Type
+    | FuncDef Name Params Expr
+    | DataDef Name [Constructor]
 
-data Function = Function {
-    -- | Name of the function.
-    funcName :: Name,
-    -- | Parameters that the function takes.
-    funcParams :: [Param],
-    -- | Return type of the function, written as the last
-    -- type in a type signature
-    funcReturn :: Type,
-    -- | The body of the function.
-    funcBody :: Expr
-    }
+data Pattern
+    = Param Name
+    | CtorPtrn Name [Pattern]
 
-data Param = Param {
-    paramName :: Name,
-    paramType :: Type
-    }
+type Params = [Pattern]
+
+type Param = Pattern
 
 data Expr
     = VarExpr Name
     | IntExpr Int64
     | FloatExpr Double
-    | StringExpr BS.ByteString
-    | FuncApp Expr Expr
-    | Lambda {
-        exprParams :: [Param],
-        exprReturn :: Type,
-        exprBody :: Expr
-    }
-    | Match Expr [(Expr, Expr)]
+    | CharExpr Char
+    | StringExpr ByteString
+    -- | SHOULD NOT BE EMPTY (but NonEmpty makes for ugly code).
+    -- A list of function applications. It is done this
+    -- way to allow for custom operator precedence. A
+    -- Shunting-Yard algorithm will figure the application
+    -- order after parsing.
+    | FuncApp [Expr]
+    | Lambda [Pattern] Expr
+    | Match Expr [Case]
+    | TypedExpr Expr Type
 
-data Data = Data {
-    dataName :: Name,
-    dataCtors :: [Constructor]
-    }
+data Case = Case Pattern Expr
 
-data Constructor = Constructor {
-    ctorName :: Name,
-    ctorParams :: [Param]
+data Constructor
+    = Constructor {
+        ctorName :: Name,
+        ctorParams :: Type
+    }
+    | Nullary {
+        ctorName :: Name
     }

@@ -1,4 +1,34 @@
 data IntTree {
-    Node :: value: I64 -> left: IntTree -> right: IntTree;
+    Node : I64 -> IntTree -> IntTree;
     Empty;
 }
+
+func insert : I64 -> IntTree -> IntTree;
+func insert a (Empty)
+    = Node a Empty Empty;
+func insert a (Node b left right)
+    = match a < b {
+        True => Node b (insert a left) right;
+        False => match a > b {
+            True => Node b left (insert a right);
+            False => Node a left right;
+        };
+    };
+
+data MaybeI64 {
+    JustI64 : I64;
+    NoI64;
+}
+
+-- Depth-first-search
+func dfs : (I64 -> Boolean) -> IntTree -> MaybeI64;
+func dfs f (Empty)
+    = NoI64;
+func dfs f (Node a left right)
+    = match f a {
+        True => a;
+        False => match dfs f left {
+            JustI64 i => i;
+            NoI64 => dfs f right;
+        };
+    };
