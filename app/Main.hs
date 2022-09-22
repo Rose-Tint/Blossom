@@ -2,7 +2,7 @@ module Main (
     main
 ) where
 
-import Blossom.Cmd
+import Blossom.Cmd (parseCmdLine)
 
 
 main :: IO ()

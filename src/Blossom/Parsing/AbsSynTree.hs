@@ -10,10 +10,9 @@ module Blossom.Parsing.AbsSynTree (
     Param,
 ) where
 
-import Data.ByteString.Lazy (ByteString)
-
 import Blossom.Typing.Type (Type)
 import Blossom.Common.Name (Name)
+import Data.ByteString.Lazy (ByteString)
 import Data.Int (Int64)
 
 

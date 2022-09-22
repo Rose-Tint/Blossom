@@ -1,3 +1,2 @@
 # Examples
-
-WARNING: For the time being, none of these examples are guarenteed to be fully up-to-date!
+DISCLAIMER: These examples are *not* all guarenteed to be up-to-date!

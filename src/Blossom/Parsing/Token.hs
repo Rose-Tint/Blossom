@@ -6,7 +6,7 @@ module Blossom.Parsing.Token (
 ) where
 
 import Data.Int (Int64)
-import qualified Data.ByteString.Lazy as BS
+import Data.ByteString.Lazy (ByteString)
 
 import Blossom.Common.Name (Name, mkName)
 
@@ -14,7 +14,7 @@ import Blossom.Common.Name (Name, mkName)
 data Token
     = TokInteger Int64
     | TokFloat Double
-    | TokString BS.ByteString
+    | TokString ByteString
     | TokChar Char
     | TokOperator Name
     | TokSmallId Name

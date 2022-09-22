@@ -2,9 +2,7 @@ module Blossom.RenameTest (
     tests,
 ) where
 
-import Test.HUnit
-
--- import Blossom.Rename
+import Test.HUnit (Test(TestList, TestLabel))
 
 
 tests :: Test

@@ -3,12 +3,11 @@ module Main (
 ) where
 
 
-import Test.HUnit
+import Test.HUnit (Test(TestList), runTestTTAndExit)
 
-import qualified Blossom.CmdTest
-import qualified Blossom.Parsing.LexerTest
-import qualified Blossom.Parsing.ParserTest
-import qualified Blossom.RenameTest
+import qualified Blossom.Parsing.LexerTest (tests)
+import qualified Blossom.Parsing.ParserTest (tests)
+import qualified Blossom.RenameTest (tests)
 
 
 main :: IO ()
@@ -16,7 +15,6 @@ main = runTestTTAndExit tests
 
 tests :: Test
 tests = TestList [
-    Blossom.CmdTest.tests,
     Blossom.Parsing.LexerTest.tests,
     Blossom.Parsing.ParserTest.tests,
     Blossom.RenameTest.tests

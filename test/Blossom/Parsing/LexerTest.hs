@@ -4,11 +4,15 @@ module Blossom.Parsing.LexerTest (
     tests
 ) where
 
-import Test.HUnit
-import qualified Data.ByteString.Lazy.Char8 as BSC
+import Test.HUnit (Test(..), (@=?))
 
-import Blossom.Parsing.Lexer
-import Blossom.Parsing.Token
+import Blossom.Parsing.Lexer (tokenize)
+import Blossom.Parsing.Token (
+    Token(..),
+    mkBigId,
+    mkSmallId,
+    mkOperator,
+    )
 
 
 tests :: Test
@@ -35,7 +39,7 @@ tests = TestLabel "Blossom.Parsing.Lexer" $ TestList [
             let actual = tokenize "\"foobar\" \"\""
                 expected = Right [
                     TokString "foobar",
-                    TokString BSC.empty
+                    TokString ""
                     ]
             in expected @=? actual,
         TestLabel "operators" $ TestCase $

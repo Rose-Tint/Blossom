@@ -2,21 +2,19 @@ module Blossom.Rename (
     runRename,
 ) where
 
-import qualified Control.Monad.State as S (State)
-import Control.Monad.State hiding (State)
-import qualified Data.ByteString as BS (append)
-import Data.ByteString (ByteString)
+import Control.Monad.State (State, gets, modify, evalState)
+import Data.ByteString (ByteString, append)
 
 import Blossom.Common.Name (Name(..))
 import Blossom.Typing.Type (Type(..))
 
 
-data State = State {
+data RenamerState = RenamerState {
     stateCounter :: Word,
     stateModule :: ByteString
     }
 
-type Renamer = S.State State
+type Renamer = State RenamerState
 
 
 class Rename a where
@@ -33,8 +31,8 @@ instance Rename Type where
         return (t1' :-> t2')
 
 
-newState :: ByteString -> State
-newState = State 01
+newState :: ByteString -> RenamerState
+newState = RenamerState 01
 
 runRename :: Rename a => ByteString -> a -> a
 runRename modName = flip evalState (newState modName) . rename
@@ -42,7 +40,7 @@ runRename modName = flip evalState (newState modName) . rename
 prependModule :: Name -> Renamer Name
 prependModule (Name name) = do
     modName <- gets stateModule
-    let name' = BS.append name modName
+    let name' = append name modName
     return (Name name')
 prependModule _ = freshId
 

@@ -12,13 +12,12 @@ module Blossom.Parsing.Lexer (
     getPrettyAlexPosn,
 ) where
 
-import Data.Char (digitToInt)
-import qualified Data.ByteString.Lazy.Char8 as CBS
--- import qualified Data.ByteString.Short as ByteString
--- import qualified Data.ByteString.Lazy as ByteString -- imported by Alex
-
-import Blossom.Parsing.Token
+import Blossom.Parsing.Token (Token(..))
 import Blossom.Common.Name (mkName)
+import qualified Data.ByteString.Lazy.Char8 as CBS (foldl', unpack)
+-- import qualified Data.ByteString.Lazy as ByteString -- imported by Alex
+import Data.Char (digitToInt)
+
 }
 
 %wrapper "monadUserState-bytestring"

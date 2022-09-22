@@ -3,7 +3,21 @@ module Blossom.Cmd (
     parseCmdLine,
 ) where
 
-import Options.Applicative
+import Options.Applicative (
+    Alternative(many),
+    fullDesc,
+    help,
+    info,
+    long,
+    metavar,
+    short,
+    strArgument,
+    switch,
+    execParser,
+    helper,
+    Parser,
+    ParserInfo,
+    )
 
 
 data CmdLine = CmdLine {

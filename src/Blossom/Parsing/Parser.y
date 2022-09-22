@@ -5,11 +5,25 @@ module Blossom.Parsing.Parser (
 
 import qualified Data.List.NonEmpty as NE
 
-import Blossom.Common.Name
-import Blossom.Parsing.AbsSynTree
-import Blossom.Parsing.Lexer
-import Blossom.Parsing.Token
-import Blossom.Typing.Type
+import Blossom.Common.Name (Name)
+import Blossom.Parsing.AbsSynTree (
+    ModuleAST(..),
+    Import(..),
+    TopLevelExpr(..),
+    Pattern(..),
+    Expr(..),
+    Constructor(..),
+    Case(..),
+    Params,
+    )
+import Blossom.Parsing.Lexer (
+    Alex,
+    lexer,
+    getPrettyAlexPosn,
+    alexError,
+    )
+import Blossom.Parsing.Token (Token(..))
+import Blossom.Typing.Type (Type(..))
 }
 
 

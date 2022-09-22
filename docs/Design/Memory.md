@@ -1,62 +1,7 @@
 # Memory
-
 ## Table of Contents
-
-
-
-
-
-## Values
-
-### How a Value Looks in Memory
-
-In Blossom, values allocated on the heap are represented in memory in
-the following arrangement:
-```
-+---------+-----------+
-| header | fields... |
-+---------+-----------+
-```
-where `header` is a machine word representing the constructor, and
-`fields...` represent pointers to the fields as words.
-
-lets take the following file for example:
-
-```
-import Numerics;
-
-data IntTree {
-    Node
-        :: value: Int
-        -> left: IntTree
-        -> right: IntTree
-        ;
-    Empty;
-}
-
-newIntTree :: value: I32 -> IntTree
-    => Node value Empty Empty;
-```
-
-The C equivalent to `IntTree` would be
-```C
-typedef union IntTree {
-    enum Tag {
-        Node,
-        Empty
-    } tag;
-
-    struct Node {
-        int value;
-        struct Node* left;
-        struct Node* right;
-    } node;
-} IntTree;
-```
-
-
+<!--
 ## GHC LLVM-IR Study Notes :)
-
 Given:
 ```Haskell
 data AB
@@ -92,4 +37,4 @@ GHC generates the following LLVM IR ('paraphrased'):
     info $def: WAY too long.
 `B_con`:
     info: `alias i8, bitcast (void (...)* @Test_B_con_info$def to i8*)`
-    info $def: WAY too long.
+    info $def: WAY too long. -->

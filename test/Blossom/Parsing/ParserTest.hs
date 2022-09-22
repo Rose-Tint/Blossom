@@ -2,9 +2,7 @@ module Blossom.Parsing.ParserTest (
     tests,
 ) where
 
-import Test.HUnit
-
-import Blossom.Parsing.Parser ()
+import Test.HUnit (Test(TestList, TestLabel))
 
 
 tests :: Test

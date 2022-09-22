@@ -6,7 +6,7 @@
 - [Identifiers](#identifiers)
 - [Primitive Types](#primitive-types)
 - [Declarations and Definitions](#declarations-and-definitions)
-- [Patterns](#patterns)
+- [Pattern-Matching](#pattern-matching)
 - [Functions](#functions)
 - [Purity](#purity)
 <!-- - [Parametric Types](#parametric-types) -->
@@ -14,8 +14,7 @@
 
 
 ## Identifiers
-
-- Types
+- Dataypes and Constructors
     - Begin with a capital letter
     - Match the regular expression "$\[A-Z\]\[a-z-A-Z0-9_'\]^"
 - Functions
@@ -24,7 +23,6 @@
 
 
 ## Primitive Types
-
 - `Boolean`
 - integral
     - `Big` (arbitrary-precision integer)
@@ -34,27 +32,9 @@
 - `String`
 - `Unit`
 
-
 ## Declarations and Definitions
-
-- functions
-    - possibilities:
-
-
-## Patterns
-
-Blossom has pattern-matching
-
-
+## Pattern-Matching
 ## Functions
-
-- Partial application
-
-
 ## Purity
-
-
 <!-- ## Parametric Types -->
-
-
 ## User-Defined Types
