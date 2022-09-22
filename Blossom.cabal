@@ -42,7 +42,6 @@ library BlossomLib
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
         Blossom.Parsing.Token,
-        Blossom.Rename,
         Blossom.Typing.Type
     build-tool-depends:
         alex:alex   >= 3.2,
@@ -50,6 +49,7 @@ library BlossomLib
     build-depends:
         array                >= 0.5.4,
         bytestring           >= 0.10.12,
+        -- containers           >= 0.6.5,
         directory            >= 0.10.12,
         filepath             >= 1.4.2,
         -- llvm-hs-pure         >= 9.0.0,
