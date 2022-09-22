@@ -25,7 +25,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                 \data ExceptI32 {\n\
                 \    Failure : String;\n\
                 \    Success : I32;\n\
-                \};\n\
+                \}\n\
                 \func fail : String -> ExceptI32 -> ExceptI32;\n\
                 \func fail newMsg (Failure oldMsg)\n\
                 \    = Failure (oldMsg ++ \"\\n~~and\\n\" ++ newMsg);\n\
@@ -33,11 +33,11 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                 \    = Failure (msg ++ \"\\nLast value: \" ++ pretty i);\n"
             expected = Right $ ModuleAST {
                 moduleImports = [Import "Pretty"],
-                moduleTopExprs = [
-                    DataDef "ExceptI32" [
+                moduleTopExprs = reverse [
+                    DataDef "ExceptI32" (reverse [
                         Constructor "Failure" (TypeCon "String" []),
                         Constructor "Success" (TypeCon "I32" [])
-                        ],
+                        ]),
                     FuncDecl "fail" (
                         TypeCon "String" []
                         :-> TypeCon "ExceptI32" []
@@ -67,7 +67,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                             FuncApp [
                                 VarExpr "msg",
                                 VarExpr "++",
-                                StringExpr "\\nLast Value: ",
+                                StringExpr "\\nLast value: ",
                                 VarExpr "++",
                                 VarExpr "pretty",
                                 VarExpr "i"

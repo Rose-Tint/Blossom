@@ -37,6 +37,7 @@ import Data.ByteString.Lazy (ByteString)
 %token
     integer                 { TokInteger $$ }
     float                   { TokFloat $$ }
+    char                    { TokChar $$ }
     string                  { TokString $$ }
     operator                { TokOperator $$ }
     small_id                { TokSmallId $$ }
@@ -59,14 +60,17 @@ import Data.ByteString.Lazy (ByteString)
 
 -- PLEASE NOTE: If function application is not as expected,
 -- please remove the following precedence declaration.
--- It did turned 12 s/r conflicts into reduces for FuncApp.
-%nonassoc integer float string small_id big_id "(" "->"
+-- It did turn 12 s/r conflicts into reduces for FuncApp.
+-- (commented out bc it messed things up. :/)
+-- %nonassoc integer float string small_id big_id char "(" -- "->"
 
 -- ghost precedence for function application
 -- https://stackoverflow.com/questions/27630269
-%nonassoc APP
+-- %nonassoc APP
+
 
 %%
+
 
 Module :: { ModuleAST }
     : ImportList TopLevel { ModuleAST $1 $2 }
@@ -122,7 +126,7 @@ Stmt :: { Expr }
     : Expr ";" { $1 }
 
 StmtAssignment :: { Expr }
-    : "=" Stmt ";" { $2 }
+    : "=" Stmt { $2 }
 
 Implication :: { Expr }
     : "=>" Expr { $2 }
@@ -132,23 +136,26 @@ Expr :: { Expr }
     | Term Signature { TypedExpr $1 $2 }
     | "\\" Params Implication { Lambda $2 $3 }
     | match Term "{" MatchCases "}" { Match $2 $4 }
+    | FuncApp { FuncApp $1 }
 
 Term :: { Expr }
     : small_id { VarExpr $1 }
     | big_id { VarExpr $1 }
     | integer { IntExpr $1 }
     | float { FloatExpr $1 }
+    | char { CharExpr $1 }
     | string { StringExpr $1 }
-    | FuncApp { FuncApp $1 }
-    | "(" operator ")" { VarExpr $2 }
+    | operator { VarExpr $1 }
+    -- | "(" operator ")" { VarExpr $2 }
     | "(" Expr ")" { $2 }
 
 FuncApp :: { [Expr] }
-    : FuncApp_ %prec APP { reverse $1 }
+    : FuncApp_ { reverse $1 }
 
 FuncApp_ :: { [Expr] }
-    : FuncApp_ Term %prec APP { ($2:$1) }
-    | Term Term %prec APP { [$2, $1] } -- backwards bc it gets reversed
+    : FuncApp_ Term { ($2:$1) }
+    -- | FuncApp_ operator { (VarExpr $2:$1) }
+    | Term Term { [$2, $1] } -- backwards bc it gets reversed
 
 MatchCases :: { [Case] }
     : MatchCases MatchCase { ($2:$1) }
@@ -163,10 +170,10 @@ Type :: { Type }
     | "(" Type ")" { $2 }
 
 Types0 :: { [Type] }
-    : Types0_ %prec APP { reverse $1 }
+    : Types0_ { reverse $1 }
 
 Types0_ :: { [Type] }
-    : Types0_ Type %prec APP { ($2:$1) }
+    : Types0_ Type { ($2:$1) }
     | {- EMPTY -} { [] }
 
 DataDefinition :: { TopLevelExpr }
@@ -178,7 +185,7 @@ Constructors :: { [Constructor] }
     | {- EMPTY -} { [] }
 
 Constructor :: { Constructor }
-    : big_id SigWithSemi ";" { Constructor $1 $2 }
+    : big_id SigWithSemi { Constructor $1 $2 }
     | big_id ";" { Nullary $1 }
 
 
