@@ -19,6 +19,8 @@ common base-depends
         Haskell2010
     default-extensions:
         BangPatterns
+    other-extensions:
+        OverloadedStrings
     ghc-options:
         -fhide-source-paths
         -Wall
