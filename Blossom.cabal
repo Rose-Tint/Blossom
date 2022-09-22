@@ -34,8 +34,6 @@ library BlossomLib
     import:
         base-depends
     exposed-modules:
-        Blossom.Backend.Cpp,
-        Blossom.Backend.LLVM,
         Blossom.Cmd,
         Blossom.Common.Name,
         Blossom.Parsing.AbsSynTree,

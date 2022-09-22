@@ -15,7 +15,7 @@
       },
       "type": "shell",
       "label": "Run with C++ backend",
-      "command": "cabal v2-run Blossom -- example/IntTree.bl --cpp"
+      "command": "cabal v2-run Blossom"
     },
     {
       "group": {
