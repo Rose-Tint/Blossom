@@ -31,7 +31,7 @@ import Data.ByteString.Lazy (ByteString)
 %error { parseError }
 %lexer { lexer } { TokEnd }
 %monad { Alex }
--- %expect
+%expect 4
 
 %tokentype { Token }
 %token
