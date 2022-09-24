@@ -30,7 +30,11 @@ GHC generates the following LLVM IR ('paraphrased'):
     info $def: WAY too long.
 `AB`:
     closure table struct: `type <{i64, i64}>`
-    closure table $def: `global %AB_closure_tbl_struct<{i64 add (i64 ptrtoint (%A_closure_struct* @A_closure$def to i64),i64 1), i64 add (i64 ptrtoint (%B_closure_struct* @B_closure$def to i64),i64 2)}>`
+    closure table $def:
+        `global %AB_closure_tbl_struct<{
+            i64 add (i64 ptrtoint (%A_closure_struct* @A_closure$def) to i64), i64 1),
+            i64 add (i64 ptrtoint (%B_closure_struct* @B_closure$def) to i64), i64 2)
+        }>`
     closure table: `alias i8, bitcast (%AB_closure_tbl_struct* @AB_closure_tbl$def to i8*)`
 `A_con`:
     info: `alias i8, bitcast (void (...)* @Test_A_con_info$def to i8*)`
