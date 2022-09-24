@@ -38,6 +38,11 @@ library BlossomLib
     exposed-modules:
         Blossom.Cmd,
         Blossom.Common.Name,
+        Blossom.LLTree.Closure,
+        Blossom.LLTree.Info,
+        Blossom.LLTree.Module,
+        Blossom.LLTree.Name,
+        Blossom.LLTree.Type,
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
