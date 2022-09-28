@@ -12,16 +12,16 @@ import Blossom.Parsing.AbsSynTree (
     Pattern(..),
     Expr(..),
     Constructor(..),
+    Type(..),
     )
 import Blossom.Parsing.Parser (parse)
-import Blossom.Typing.Type (Type(..))
 
 
 tests :: Test
 tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
     TestCase $
         let actual = parse
-                "import Pretty;\n\
+                "import Text::Pretty;\n\
                 \data ExceptI32 {\n\
                 \    Failure : String;\n\
                 \    Success : I32;\n\
@@ -32,7 +32,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                 \func fail msg (Success i)\n\
                 \    = Failure (msg ++ \"\\nLast value: \" ++ pretty i);\n"
             expected = Right $ ModuleAST {
-                moduleImports = [Import "Pretty"],
+                moduleImports = [Import "Text::Pretty"],
                 moduleTopExprs = reverse [
                     DataDef "ExceptI32" (reverse [
                         Constructor "Failure" (TypeCon "String" []),

@@ -7,8 +7,7 @@ module Blossom.Parsing.Token (
 
 import Data.Int (Int64)
 import Data.ByteString.Lazy (ByteString)
-
-import Blossom.Common.Name (Name, mkName)
+import Blossom.Common.Name (Iden, mkIden)
 
 
 data Token
@@ -16,12 +15,11 @@ data Token
     | TokFloat Double
     | TokString ByteString
     | TokChar Char
-    | TokOperator Name
-    | TokSmallId Name
-    | TokBigId Name
+    | TokOperator Iden
+    | TokSmallId Iden
+    | TokBigId Iden
     | TokSemi
     | TokColon
-    | TokDoubleColon
     | TokArrow
     | TokEquals
     | TokEqArrow
@@ -40,12 +38,12 @@ data Token
 
 -- | Creates a `@TokSmallId@` using a `@String@`
 mkSmallId :: String -> Token
-mkSmallId = TokSmallId . mkName
+mkSmallId = TokSmallId . mkIden
 
 -- | Creates a `@TokBigId@` using a `@String@`
 mkBigId :: String -> Token
-mkBigId = TokBigId . mkName
+mkBigId = TokBigId . mkIden
 
 -- | Creates a `@TokOperator@` using a `@String@`
 mkOperator :: String -> Token
-mkOperator = TokOperator . mkName
+mkOperator = TokOperator . mkIden

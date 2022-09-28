@@ -4,8 +4,8 @@ module Blossom.LLTree.Closure (
     FuncPtr(..),
 ) where
 
-import Blossom.LLTree.Type
-import Blossom.LLTree.Name
+import Blossom.LLTree.Type (Type)
+import Blossom.Common.Name (Name)
 
 
 data ClosureType

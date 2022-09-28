@@ -41,7 +41,6 @@ library BlossomLib
         Blossom.LLTree.Closure,
         Blossom.LLTree.Info,
         Blossom.LLTree.Module,
-        Blossom.LLTree.Name,
         Blossom.LLTree.Type,
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,

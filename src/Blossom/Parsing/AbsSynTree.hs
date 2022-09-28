@@ -8,10 +8,10 @@ module Blossom.Parsing.AbsSynTree (
     Case(..),
     Params,
     Param,
+    Type(..),
 ) where
 
-import Blossom.Typing.Type (Type)
-import Blossom.Common.Name (Name)
+import Blossom.Common.Name (Iden)
 import Data.ByteString.Lazy (ByteString)
 import Data.Int (Int64)
 
@@ -22,18 +22,18 @@ data ModuleAST = ModuleAST {
     }
     deriving (Show, Eq)
 
-newtype Import = Import Name
+newtype Import = Import Iden
     deriving (Show, Eq)
 
 data TopLevelExpr
-    = FuncDecl Name Type
-    | FuncDef Name Params Expr
-    | DataDef Name [Constructor]
+    = FuncDecl Iden Type
+    | FuncDef Iden Params Expr
+    | DataDef Iden [Constructor]
     deriving (Show, Eq)
 
 data Pattern
-    = Param Name
-    | CtorPtrn Name [Pattern]
+    = Param Iden
+    | CtorPtrn Iden [Pattern]
     deriving (Show, Eq)
 
 type Params = [Pattern]
@@ -41,7 +41,7 @@ type Params = [Pattern]
 type Param = Pattern
 
 data Expr
-    = VarExpr Name
+    = VarExpr Iden
     | IntExpr Int64
     | FloatExpr Double
     | CharExpr Char
@@ -62,10 +62,22 @@ data Case = Case Pattern Expr
 
 data Constructor
     = Constructor {
-        ctorName :: Name,
+        ctorName :: Iden,
         ctorParams :: Type
     }
     | Nullary {
-        ctorName :: Name
+        ctorName :: Iden
     }
+    deriving (Show, Eq)
+
+infixr 9 :->
+
+-- | !!!ONLY TO BE USED PRE-RENAMING!!!
+data Type
+    = TypeCon {
+        typeName :: Iden,
+        typeArgs :: [Type]
+    }
+    -- TODO: Type variables
+    | Type :-> Type
     deriving (Show, Eq)

@@ -18,7 +18,7 @@ module Blossom.LLTree.Module (
 ) where
 
 import Data.ByteString (ByteString)
-import Blossom.LLTree.Name (Name)
+import Blossom.Common.Name (Name)
 import Blossom.LLTree.Closure (
     FuncPtr(..),
     Closure(..),

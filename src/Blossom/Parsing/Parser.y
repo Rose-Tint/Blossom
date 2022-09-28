@@ -3,7 +3,7 @@ module Blossom.Parsing.Parser (
     parse,
 ) where
 
-import Blossom.Common.Name (Name)
+import Blossom.Common.Name (Iden)
 import Blossom.Parsing.AbsSynTree (
     ModuleAST(..),
     Import(..),
@@ -13,6 +13,7 @@ import Blossom.Parsing.AbsSynTree (
     Constructor(..),
     Case(..),
     Params,
+    Type(..),
     )
 import Blossom.Parsing.Lexer (
     Alex,
@@ -22,7 +23,6 @@ import Blossom.Parsing.Lexer (
     alexError,
     )
 import Blossom.Parsing.Token (Token(..))
-import Blossom.Typing.Type (Type(..))
 import Data.ByteString.Lazy (ByteString)
 }
 
@@ -45,7 +45,6 @@ import Data.ByteString.Lazy (ByteString)
     "\\"                    { TokBackslash }
     ";"                     { TokSemi }
     ":"                     { TokColon }
-    -- "::"                    { TokDoubleColon }
     "->"                    { TokArrow }
     "="                     { TokEquals }
     "=>"                    { TokEqArrow }
@@ -94,7 +93,7 @@ TopLevelExpr :: { TopLevelExpr }
 -- | The part that prefixes both function
 -- declarations *and* definitions
 -- TODO: abstract `small_id` and `operator` to one.
-FuncOpener :: { Name }
+FuncOpener :: { Iden }
     : func small_id { $2 }
     | func "(" operator ")" { $3 }
 

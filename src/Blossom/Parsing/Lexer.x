@@ -13,7 +13,6 @@ module Blossom.Parsing.Lexer (
 ) where
 
 import Blossom.Parsing.Token (Token(..))
-import Blossom.Common.Name (mkName)
 import qualified Data.ByteString.Lazy.Char8 as CBS (foldl', unpack)
 -- import qualified Data.ByteString.Lazy as ByteString -- imported by Alex
 import Data.Char (digitToInt)
@@ -36,13 +35,13 @@ $symbol             = [\!\#\$\%\&\*\+\.\/\<\=\>\?\@\^\|\-\~]
 @string             = \" [^\"]* \"
 @small_id           = $small $id_char*
 @big_id             = $big $id_char*
-@operator           = $symbol [$symbol \:]*
+@operator           = $symbol $symbol*
+@qualifier          = @big_id "::"
 
 tokens :-
     "\\"                    { reserved TokBackslash }
     ";"                     { reserved TokSemi }
     ":"                     { reserved TokColon }
-    "::"                    { reserved TokDoubleColon }
     "->"                    { reserved TokArrow }
     "="                     { reserved TokEquals }
     "=>"                    { reserved TokEqArrow }
@@ -60,9 +59,9 @@ tokens :-
     @float                  { float }
     @char                   { char }
     @string                 { string }
-    @small_id               { smallId }
-    @big_id                 { bigId }
-    @operator               { operator }
+    @qualifier* @small_id   { smallId }
+    @qualifier* @big_id     { bigId }
+    @qualifier* @operator   { operator }
 
 
 -- strange placement makes error message positions from Alex accurate
@@ -112,16 +111,19 @@ string (_pos, _prev, input, _cons) len = return $ TokString $
     ByteString.drop 1 (ByteString.take (len - 1) input)
 
 smallId :: AlexInput -> Int64 -> Alex Token
-smallId (_pos, _prev, input, _cons) len = return $ TokSmallId $
-    mkName (CBS.unpack (ByteString.take len input))
+smallId (_pos, _prev, input, _cons) len =
+    let name = ByteString.toStrict $ ByteString.take len input
+    in return $ TokSmallId $ name
 
 bigId :: AlexInput -> Int64 -> Alex Token
-bigId (_pos, _prev, input, _cons) len = return $ TokBigId $
-    mkName (CBS.unpack (ByteString.take len input))
+bigId (_pos, _prev, input, _cons) len =
+    let name = ByteString.toStrict $ ByteString.take len input
+    in return $ TokBigId $ name
 
 operator :: AlexInput -> Int64 -> Alex Token
-operator (_pos, _prev, input, _cons) len = return $ TokOperator $
-    mkName (CBS.unpack (ByteString.take len input))
+operator (_pos, _prev, input, _cons) len =
+    let name = ByteString.toStrict $ ByteString.take len input
+    in return $ TokOperator $ name
 
 reserved :: Token -> AlexInput -> Int64 -> Alex Token
 reserved tok (_pos, _prev, _input, _) _len = return tok
