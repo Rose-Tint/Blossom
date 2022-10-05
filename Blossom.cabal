@@ -1,4 +1,4 @@
-cabal-version:      2.4
+cabal-version:      3.6
 name:               Blossom
 version:            0.1.0.0
 synopsis:           A functional programming language.
@@ -10,7 +10,6 @@ extra-source-files:
     LICENSE
     CHANGELOG.md
     README.md
-
 
 common base-depends
     build-depends:
@@ -31,8 +30,7 @@ common base-depends
         -Wno-unused-do-bind
         -Werror
 
-
-library BlossomLib
+library
     import:
         base-depends
     exposed-modules:
@@ -70,34 +68,51 @@ library BlossomLib
     hs-source-dirs:
         src
 
-executable Blossom
+executable Blossom-exe
     import:
         base-depends
     main-is:
         Main.hs
     build-depends:
-        BlossomLib
+        Blossom
     hs-source-dirs:
         app
     ghc-options:
         -threaded
 
-test-suite Test
+-- https://nikita-volkov.github.io/profiling-cabal-projects/
+-- https://downloads.haskell.org/ghc/9.0.1/docs/html/users_guide/profiling.html
+executable Blossom-prof
+    import:
+        base-depends
+    main-is:
+        Main.hs
+    build-depends:
+        Blossom
+    hs-source-dirs:
+        app
+    ghc-options:
+        "-with-rtsopts=-p -s -h"
+        -O2
+        -threaded
+        -fprof-auto
+
+test-suite Blossom-test
     import:
         base-depends
     type:
         exitcode-stdio-1.0
-    main-is:
-        Test.hs
     other-modules:
-        Blossom.LLVM.ToLLVMTest,
         Blossom.Common.NameTest,
+        Blossom.LLVM.ToLLVMTest,
         Blossom.Parsing.LexerTest,
         Blossom.Parsing.ParserTest
-    hs-source-dirs:
-        app,
-        test
     build-depends:
-        BlossomLib >= 0.1.0.0,
+        Blossom,
         bytestring >= 0.10.12,
         HUnit      >= 1.6.2.0
+    main-is:
+        Test.hs
+    hs-source-dirs:
+        test
+        app

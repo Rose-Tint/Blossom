@@ -1,7 +1,4 @@
-// cabal v2-install base --enable-profiling --enable-library-profiling --enable-executable-profiling -j2 --dry-run
 {
-  // Automatically created by phoityne-vscode extension.
-
   "version": "2.0.0",
   "presentation": {
     "reveal": "always",
@@ -14,8 +11,8 @@
         "isDefault": true
       },
       "type": "shell",
-      "label": "Run with C++ backend",
-      "command": "cabal v2-run Blossom"
+      "label": "Run",
+      "command": "cabal v2-run Blossom-exe"
     },
     {
       "group": {
@@ -24,7 +21,16 @@
       },
       "type": "shell",
       "label": "Build All",
-      "command": "cabal v2-build"
+      "command": "cabal v2-build all"
+    },
+    {
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "type": "shell",
+      "label": "Profile",
+      "command": "cabal v2-run Blossom-prof -O2 -fprof --enable-profiling"
     },
     {
       "group": {
@@ -33,23 +39,23 @@
       },
       "type": "shell",
       "label": "Test All",
-      "command": "cabal v2-test"
+      "command": "cabal v2-test all"
     },
     {
-      "group": "none",
+      "group": {
+        "kind": "none",
+        "isDefault": false
+      },
       "type": "shell",
-      "label": "GHCI",
-      "command": "cabal v2-repl"
-    },
-    {
-      "group": "none",
-      "type": "shell",
-      "label": "Update Hackage List",
-      "command": "cabal v2-update",
+      "label": "Reinstall Dependencies",
+      "command": "cabal v2-build all --only-dependencies --reinstall --enable-profiling",
       "problemMatcher": []
     },
     {
-      "group": "none",
+      "group": {
+        "kind": "none",
+        "isDefault": false
+      },
       "type": "shell",
       "label": "Happy info",
       "command": "happy src/Blossom/Parsing/Parser.y -d -i -s -g -c -a; rm ./src/Blossom/Parsing/Parser.hs",
