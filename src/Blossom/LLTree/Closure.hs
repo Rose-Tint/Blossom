@@ -2,10 +2,11 @@ module Blossom.LLTree.Closure (
     ClosureType(..),
     Closure(..),
     FuncPtr(..),
+    isStaticClosType,
 ) where
 
-import Blossom.LLTree.Type (Type)
 import Blossom.Common.Name (Name)
+import Blossom.LLTree.Type (Type, Var)
 
 
 data ClosureType
@@ -15,8 +16,13 @@ data ClosureType
     | StaticFuncClosure
 
 data Closure = Closure {
-    closFreeVars :: [Name],
+    closFreeVars :: [Var],
     closFuncPtr :: FuncPtr
     }
 
 data FuncPtr = FuncPtr Name Type
+
+isStaticClosType :: ClosureType -> Bool
+isStaticClosType StaticCtorClosure = True
+isStaticClosType StaticFuncClosure = True
+isStaticClosType _ = False

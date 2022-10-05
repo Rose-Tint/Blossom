@@ -2,34 +2,11 @@ module Blossom.LLTree.Module (
     Name,
     ModuleLLT(..),
     Import(..),
-    Definition(..),
-    CtorDef(..),
-    ClosureType(..),
-    Closure(..),
-    FuncPtr(..),
-    Type(..),
-    Header(..),
-    Info(..),
-    Arity(..),
-    FuncApp(..),
-    PartialApp(..),
-    Entry,
-    Body,
 ) where
 
 import Data.ByteString (ByteString)
 import Blossom.Common.Name (Name)
-import Blossom.LLTree.Closure (
-    FuncPtr(..),
-    Closure(..),
-    ClosureType(..),
-    )
-import Blossom.LLTree.Type (Type(..))
-import Blossom.LLTree.Info (
-    Info(..),
-    Header(..),
-    Entry
-    )
+import Blossom.LLTree.Definition (Definition)
 
 
 -- | Represents a lower-level version of the AST
@@ -43,37 +20,3 @@ data ModuleLLT = ModuleLLT {
     }
 
 newtype Import = Import FilePath
-
-data Definition
-    = FuncDef {
-        funcClosure :: Closure,
-        funcInfo :: Info,
-        funcDef :: Body
-    }
-    | DataDef {
-        dataName :: Name,
-        dataCtors :: [CtorDef]
-    }
-
-data CtorDef = CtorDef {
-    ctorName :: Name,
-    ctorInfo :: Info
-    }
-
-newtype Arity = Arity Word
-
-data FuncApp = FAP {
-    fapHeader :: Header,
-    fapArity :: Arity,
-    fapClosure :: Closure,
-    fapArgs :: [Name]
-    }
-
-data PartialApp = PAP {
-    papHeader :: Header,
-    papArity :: Arity,
-    papClosure :: Closure,
-    papArgs :: [Name] -- args that have been applied,
-    }
-
-data Body
