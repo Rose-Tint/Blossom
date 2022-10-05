@@ -3,6 +3,7 @@ module Blossom.Parsing.Parser (
     parse,
 ) where
 
+import Blossom.Common.Literal (Literal(..))
 import Blossom.Common.Name (Iden)
 import Blossom.Parsing.AbsSynTree (
     ModuleAST(..),
@@ -23,7 +24,7 @@ import Blossom.Parsing.Lexer (
     alexError,
     )
 import Blossom.Parsing.Token (Token(..))
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString.Lazy (ByteString, toStrict)
 }
 
 
@@ -140,10 +141,10 @@ Expr :: { Expr }
 Term :: { Expr }
     : small_id { VarExpr $1 }
     | big_id { VarExpr $1 }
-    | integer { IntExpr $1 }
-    | float { FloatExpr $1 }
-    | char { CharExpr $1 }
-    | string { StringExpr $1 }
+    | integer { LitExpr (IntLit $1) }
+    | float { LitExpr (FloatLit $1) }
+    | char { LitExpr (CharLit $1) }
+    | string { LitExpr (StringLit (toStrict $1)) }
     | operator { VarExpr $1 }
     -- | "(" operator ")" { VarExpr $2 }
     | "(" Expr ")" { $2 }

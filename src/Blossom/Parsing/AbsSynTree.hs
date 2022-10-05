@@ -12,8 +12,7 @@ module Blossom.Parsing.AbsSynTree (
 ) where
 
 import Blossom.Common.Name (Iden)
-import Data.ByteString.Lazy (ByteString)
-import Data.Int (Int64)
+import Blossom.Common.Literal (Literal)
 
 
 data ModuleAST = ModuleAST {
@@ -42,10 +41,7 @@ type Param = Pattern
 
 data Expr
     = VarExpr Iden
-    | IntExpr Int64
-    | FloatExpr Double
-    | CharExpr Char
-    | StringExpr ByteString
+    | LitExpr Literal
     -- | SHOULD NOT BE EMPTY (but NonEmpty makes for ugly code).
     -- A list of function applications. It is done this
     -- way to allow for custom operator precedence. A

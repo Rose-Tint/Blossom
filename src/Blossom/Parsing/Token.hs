@@ -5,13 +5,12 @@ module Blossom.Parsing.Token (
     mkOperator,
 ) where
 
-import Data.Int (Int64)
 import Data.ByteString.Lazy (ByteString)
 import Blossom.Common.Name (Iden, mkIden)
 
 
 data Token
-    = TokInteger Int64
+    = TokInteger Integer
     | TokFloat Double
     | TokString ByteString
     | TokChar Char

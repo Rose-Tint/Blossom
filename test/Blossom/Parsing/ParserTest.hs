@@ -5,6 +5,7 @@ module Blossom.Parsing.ParserTest (
 ) where
 
 import Test.HUnit (Test(..), (@=?))
+import Blossom.Common.Literal (Literal(StringLit))
 import Blossom.Parsing.AbsSynTree (
     ModuleAST(..),
     Import(..),
@@ -52,7 +53,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                             FuncApp [
                                 VarExpr "oldMsg",
                                 VarExpr "++",
-                                StringExpr "\\n~~and\\n",
+                                LitExpr (StringLit "\\n~~and\\n"),
                                 VarExpr "++",
                                 VarExpr "newMsg"
                                 ]
@@ -67,7 +68,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                             FuncApp [
                                 VarExpr "msg",
                                 VarExpr "++",
-                                StringExpr "\\nLast value: ",
+                                LitExpr (StringLit "\\nLast value: "),
                                 VarExpr "++",
                                 VarExpr "pretty",
                                 VarExpr "i"
