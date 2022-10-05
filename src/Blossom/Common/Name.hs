@@ -3,24 +3,26 @@
 module Blossom.Common.Name (
     Iden,
     Name(..),
-    toDisplay,
+    display,
     fromQualified,
     mkIden,
+    catIdent,
 ) where
 
 import Data.String (fromString)
-import Data.ByteString (ByteString, append)
-import Data.ByteString.Char8 (spanEnd, dropWhileEnd)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS (append, concat)
+import Data.ByteString.Char8 (unpack)
 
 
 type Iden = ByteString
 
 data Name = Name {
     -- | The name of the module the identifier originates from.
-    nameModule :: ByteString,
+    nameModule :: Iden,
     -- | The un-qualified name of the identifier that appears in
     -- the source code
-    nameIden :: ByteString
+    nameIden :: Iden
     -- -- | A number that is unique to the thing this name represents.
     -- nameUnique :: Word
     }
@@ -28,13 +30,36 @@ data Name = Name {
 
 
 fromQualified :: ByteString -> Name
-fromQualified bs = Name mdl' iden
+fromQualified = go (Name "" "") . unpack
     where
-        (mdl, iden) = spanEnd (/= ':') bs
-        mdl' = dropWhileEnd (/= ':') mdl
+        go :: Name -> String -> Name
+        go (Name _mdl "") "" = error "fromQualified: empty identifier"
+        go name "" = name
+        go (Name "" _iden) "::" = error
+            "fromQualified: illegal trailing \"::\""
+        -- go (Name "" _iden) (':':':':_) = error
+        --     "fromQualified: illegal leading \"::\""
+        go name@(Name mdl iden) (':':':':rest) = case go name rest of
+            Name "" iden' -> Name mdl iden'
+            Name mdl' "" -> Name mdl' iden
+            name' -> name'
+        go (Name "" iden) str =
+            let (idenStr, rest) = span (/= ':') str
+                iden' = fromString idenStr
+            in go (Name iden iden') rest
+        go (Name mdl iden) str =
+            let (idenStr, rest) = span (/= ':') str
+                mdl' = BS.concat [mdl, "_", iden]
+                iden' = fromString idenStr
+            in go (Name mdl' iden') rest
 
-toDisplay :: Name -> ByteString
-toDisplay (Name mdl iden) = append mdl $ append "_" iden
+display :: Name -> ByteString
+display (Name mdl iden) = BS.concat [mdl, "_", iden]
 
 mkIden :: String -> Iden
 mkIden = fromString
+
+-- | `@catIdent@ name suffix` appends `suffix` to the identifier
+-- part of `name`
+catIdent :: Name -> ByteString -> Name
+catIdent (Name mdl iden) = Name mdl . BS.append iden
