@@ -37,6 +37,7 @@ library BlossomLib
         base-depends
     exposed-modules:
         Blossom.Cmd,
+        Blossom.Common.Literal,
         Blossom.Common.Name,
         Blossom.LLTree.Closure,
         Blossom.LLTree.Info,
