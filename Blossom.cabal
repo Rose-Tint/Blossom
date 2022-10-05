@@ -45,8 +45,8 @@ library BlossomLib
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
-        Blossom.Parsing.Token,
-        Blossom.Typing.Type
+        Blossom.Parsing.Token
+        -- Blossom.Typing.Type
     build-tool-depends:
         alex:alex   >= 3.2,
         happy:happy >= 1.20
