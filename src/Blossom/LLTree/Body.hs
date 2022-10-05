@@ -1,7 +1,7 @@
 module Blossom.LLTree.Body (
     Body(..),
-    Terminator(..),
     Instruction(..),
+    Terminator(..),
     Value(..),
 ) where
 

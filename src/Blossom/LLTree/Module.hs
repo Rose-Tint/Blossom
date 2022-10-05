@@ -1,12 +1,12 @@
 module Blossom.LLTree.Module (
-    Name,
-    ModuleLLT(..),
     Import(..),
+    ModuleLLT(..),
+    Name,
 ) where
 
-import Data.ByteString (ByteString)
 import Blossom.Common.Name (Name)
 import Blossom.LLTree.Definition (Definition)
+import Data.ByteString (ByteString)
 
 
 -- | Represents a lower-level version of the AST

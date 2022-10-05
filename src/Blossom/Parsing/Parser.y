@@ -6,22 +6,22 @@ module Blossom.Parsing.Parser (
 import Blossom.Common.Literal (Literal(..))
 import Blossom.Common.Name (Iden)
 import Blossom.Parsing.AbsSynTree (
-    ModuleAST(..),
-    Import(..),
-    TopLevelExpr(..),
-    Pattern(..),
-    Expr(..),
-    Constructor(..),
     Case(..),
+    Constructor(..),
+    Expr(..),
+    Import(..),
+    ModuleAST(..),
     Params,
+    Pattern(..),
+    TopLevelExpr(..),
     Type(..),
     )
 import Blossom.Parsing.Lexer (
     Alex,
-    runAlex,
-    lexer,
-    getPrettyAlexPosn,
     alexError,
+    getPrettyAlexPosn,
+    lexer,
+    runAlex,
     )
 import Blossom.Parsing.Token (Token(..))
 import Data.ByteString.Lazy (ByteString, toStrict)

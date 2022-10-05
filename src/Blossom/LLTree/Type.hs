@@ -7,8 +7,8 @@ module Blossom.LLTree.Type (
     fromASTType,
 ) where
 
-import qualified Blossom.Parsing.AbsSynTree as AST
 import Blossom.Common.Name (Name)
+import qualified Blossom.Parsing.AbsSynTree as AST (Type(..))
 
 
 data Type

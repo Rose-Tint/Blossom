@@ -70,7 +70,6 @@ library BlossomLib
     hs-source-dirs:
         src
 
-
 executable Blossom
     import:
         base-depends

@@ -1,7 +1,7 @@
 module Blossom.LLTree.Info (
+    Entry(..),
     Header(..),
     Info(..),
-    Entry(..),
     isStaticInfo,
 ) where
 

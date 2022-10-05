@@ -5,18 +5,18 @@ module Blossom.Cmd (
 
 import Options.Applicative (
     Alternative(many),
+    Parser,
+    ParserInfo,
+    execParser,
     fullDesc,
     help,
+    helper,
     info,
     long,
     metavar,
     short,
     strArgument,
     switch,
-    execParser,
-    helper,
-    Parser,
-    ParserInfo,
     )
 
 

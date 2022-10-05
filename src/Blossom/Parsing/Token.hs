@@ -1,12 +1,12 @@
 module Blossom.Parsing.Token (
     Token(..),
-    mkSmallId,
     mkBigId,
     mkOperator,
+    mkSmallId,
 ) where
 
-import Data.ByteString.Lazy (ByteString)
 import Blossom.Common.Name (Iden, mkIden)
+import Data.ByteString.Lazy (ByteString)
 
 
 data Token

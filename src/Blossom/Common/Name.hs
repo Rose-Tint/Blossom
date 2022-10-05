@@ -3,16 +3,16 @@
 module Blossom.Common.Name (
     Iden,
     Name(..),
+    catIdent,
     display,
     fromQualified,
     mkIden,
-    catIdent,
 ) where
 
-import Data.String (fromString)
-import Data.ByteString (ByteString)
-import qualified Data.ByteString as BS (append, concat)
+import Data.ByteString (ByteString, append)
+import qualified Data.ByteString as BS (concat)
 import Data.ByteString.Char8 (unpack)
+import Data.String (fromString)
 
 
 type Iden = ByteString
@@ -62,4 +62,4 @@ mkIden = fromString
 -- | `@catIdent@ name suffix` appends `suffix` to the identifier
 -- part of `name`
 catIdent :: Name -> ByteString -> Name
-catIdent (Name mdl iden) = Name mdl . BS.append iden
+catIdent (Name mdl iden) = Name mdl . append iden

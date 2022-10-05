@@ -1,6 +1,6 @@
 module Blossom.LLTree.Closure (
-    ClosureType(..),
     Closure(..),
+    ClosureType(..),
     FuncPtr(..),
     isStaticClosType,
 ) where

@@ -2,15 +2,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Blossom.Backend.LLVM.ToLLVM (
-    llvm
+    llvm,
 ) where
 
-import qualified Data.ByteString.Char8 as BS (length, unpack)
-import Data.ByteString.Short (toShort)
 import qualified Blossom.Common.Literal as Bl
 import qualified Blossom.Common.Name as Bl
-import qualified Blossom.LLTree.Type as Bl
 import qualified Blossom.LLTree.Body as Bl
+import qualified Blossom.LLTree.Type as Bl
+import qualified Data.ByteString as BS (length)
+import Data.ByteString.Char8 (unpack)
+import Data.ByteString.Short (toShort)
 import qualified LLVM.AST as LLVM
 import qualified LLVM.AST.Constant as LLVM hiding (isPacked)
 import qualified LLVM.AST.Constant (isPacked)
@@ -74,7 +75,7 @@ instance ToLLVM Bl.Literal LLVM.Constant where
                 LLVM.AST.Constant.isPacked = True,
                 LLVM.memberValues = map
                     (LLVM.Int 8 . fromIntegral . fromEnum)
-                    (BS.unpack str)
+                    (unpack str)
                 }
             ]
         }

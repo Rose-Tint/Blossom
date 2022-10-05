@@ -7,10 +7,10 @@ module Blossom.LLTree.Definition (
     PartialApp(..),
 ) where
 
-import Blossom.LLTree.Closure (Closure)
-import Blossom.LLTree.Info (Header, Info)
 import Blossom.Common.Name (Name)
 import Blossom.LLTree.Body (Body, Value)
+import Blossom.LLTree.Closure (Closure)
+import Blossom.LLTree.Info (Header, Info)
 import Blossom.LLTree.Type (Type)
 
 
