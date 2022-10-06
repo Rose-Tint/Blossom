@@ -121,7 +121,9 @@ Params_ :: { Params }
 
 Pattern :: { Pattern }
     : small_id { Param $1 }
+    | big_id { CtorPtrn $1 [] }
     | "(" big_id Params ")" { CtorPtrn $2 $3 }
+    | "(" Pattern ")" { $2 }
 
 Stmt :: { Expr }
     : Expr ";" { $1 }
