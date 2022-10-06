@@ -1,5 +1,6 @@
 {
 module Blossom.Parsing.Parser (
+    parseFile,
     parse,
 ) where
 
@@ -24,7 +25,7 @@ import Blossom.Parsing.Lexer (
     runAlex,
     )
 import Blossom.Parsing.Token (Token(..))
-import Data.ByteString.Lazy (ByteString, toStrict)
+import Data.ByteString.Lazy as BS (ByteString, toStrict, readFile)
 }
 
 
@@ -198,4 +199,11 @@ parseError tok = do
 
 parse :: ByteString -> Either String ModuleAST
 parse = flip runAlex blossomParser
+
+parseFile :: FilePath -> IO (Either String ModuleAST)
+parseFile path = do
+    contents <- BS.readFile path
+    -- the strictness of `contents` is important here!
+    let result = parse $! contents
+    return result
 }

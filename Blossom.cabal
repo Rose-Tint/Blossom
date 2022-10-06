@@ -1,5 +1,5 @@
 cabal-version:      3.6
-name:               Blossom
+name:               blossom
 version:            0.1.0.0
 synopsis:           A functional programming language.
 description:        A functional programming language.
@@ -68,13 +68,13 @@ library
     hs-source-dirs:
         src
 
-executable Blossom-exe
+executable blossom-exe
     import:
         base-depends
     main-is:
         Main.hs
     build-depends:
-        Blossom
+        blossom >= 0.1.0.0
     hs-source-dirs:
         app
     ghc-options:
@@ -82,22 +82,22 @@ executable Blossom-exe
 
 -- https://nikita-volkov.github.io/profiling-cabal-projects/
 -- https://downloads.haskell.org/ghc/9.0.1/docs/html/users_guide/profiling.html
-executable Blossom-prof
+executable blossom-prof
     import:
         base-depends
     main-is:
         Main.hs
     build-depends:
-        Blossom
+        blossom >= 0.1.0.0
     hs-source-dirs:
         app
     ghc-options:
-        "-with-rtsopts=-p -s -h"
+        "-with-rtsopts=-p -sBlossom-prof.stat"
         -O2
         -threaded
         -fprof-auto
 
-test-suite Blossom-test
+test-suite blossom-test
     import:
         base-depends
     type:
@@ -108,11 +108,11 @@ test-suite Blossom-test
         Blossom.Parsing.LexerTest,
         Blossom.Parsing.ParserTest
     build-depends:
-        Blossom,
-        bytestring >= 0.10.12,
-        HUnit      >= 1.6.2.0
+        blossom     >= 0.1.0.0,
+        bytestring  >= 0.10.12,
+        HUnit       >= 1.6.2.0
     main-is:
         Test.hs
     hs-source-dirs:
-        test
+        test,
         app

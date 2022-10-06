@@ -12,7 +12,7 @@
       },
       "type": "shell",
       "label": "Run",
-      "command": "cabal v2-run Blossom-exe"
+      "command": "cabal v2-run blossom-exe"
     },
     {
       "group": {
@@ -30,7 +30,7 @@
       },
       "type": "shell",
       "label": "Profile",
-      "command": "cabal v2-run Blossom-prof -O2 -fprof --enable-profiling"
+      "command": "cabal v2-run exe:blossom-prof -O2 -fprof --enable-profiling -- example/IntTree.bl"
     },
     {
       "group": {
