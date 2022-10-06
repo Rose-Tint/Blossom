@@ -12,7 +12,7 @@
       },
       "type": "shell",
       "label": "Run",
-      "command": "cabal v2-run blossom-exe"
+      "command": "cabal v2-run blossom-exe -O0 -- example/IntTree.bl"
     },
     {
       "group": {
@@ -30,6 +30,8 @@
       },
       "type": "shell",
       "label": "Profile",
+      // FYI, for some reason, the "--enable-profiling" optoin makes cabal
+      // compile twice... :(
       "command": "cabal v2-run exe:blossom-prof -O2 -fprof --enable-profiling -- example/IntTree.bl"
     },
     {
