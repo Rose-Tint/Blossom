@@ -4,19 +4,20 @@ module Main (
 
 import Blossom.Cmd (CmdLine(..), parseCmdLine)
 import Blossom.Parsing.Parser (parseFile)
-import Data.Maybe (catMaybes)
+import Blossom.Resolver.Monad (runResolver)
+import Data.ByteString.Char8 (pack)
+import Blossom.Resolver.Resolver (resolveAST)
 
 
 main :: IO ()
 main = do
     cmd <- parseCmdLine
-    _asts <- catMaybes <$> mapM (\path -> do
+    let sourceFiles = cmdSourceFiles cmd
+    mapM_ (\path -> do
         eAst <- parseFile path
         case eAst of
-            Left errMsg -> do
-                putStrLn errMsg
-                return Nothing
+            Left errMsg -> putStrLn errMsg
             Right !ast -> do
-                return (Just ast)
-        ) (cmdSourceFiles cmd)
-    return ()
+                let !_ = runResolver (pack path) path (resolveAST ast)
+                return ()
+        ) sourceFiles
