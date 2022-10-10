@@ -37,8 +37,6 @@ fromQualified = go (Name "" "") . unpack
         go name "" = name
         go (Name "" _iden) "::" = error
             "fromQualified: illegal trailing \"::\""
-        -- go (Name "" _iden) (':':':':_) = error
-        --     "fromQualified: illegal leading \"::\""
         go name@(Name mdl iden) (':':':':rest) = case go name rest of
             Name "" iden' -> Name mdl iden'
             Name mdl' "" -> Name mdl' iden
