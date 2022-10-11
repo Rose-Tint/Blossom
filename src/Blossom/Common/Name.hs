@@ -1,63 +1,103 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Blossom.Common.Name (
-    Iden,
+    Ident(..),
+    ModuleName,
     Name(..),
+    NameType(..),
     catIdent,
     display,
-    fromQualified,
-    mkIden,
+    external,
+    internal,
+    stripColons,
 ) where
 
+import Blossom.Common.Source (SourceLoc, zeroLoc)
 import Data.ByteString (ByteString, append)
-import qualified Data.ByteString as BS (concat)
-import Data.ByteString.Char8 (unpack)
-import Data.String (fromString)
+import qualified Data.ByteString.Char8 as BS (concat, length, dropWhile)
+import Data.ByteString.Char8 (unpack, spanEnd, dropWhileEnd)
+import Data.Ord (comparing)
+import Data.String (IsString(..))
 
 
-type Iden = ByteString
+type ModuleName = ByteString
 
-data Name = Name {
-    -- | The name of the module the identifier originates from.
-    nameModule :: Iden,
-    -- | The un-qualified name of the identifier that appears in
-    -- the source code
-    nameIden :: Iden
-    -- -- | A number that is unique to the thing this name represents.
-    -- nameUnique :: Word
+-- | The name as it appears in the source code, along with it's location
+data Ident
+    = Ident {
+        identBS :: ByteString,
+        identLoc :: SourceLoc
     }
-    deriving (Show, Eq, Ord)
+    deriving (Show)
 
+instance Eq Ident where
+    Ident id1 _loc1 == Ident id2 _loc2 = id1 == id2
 
-fromQualified :: ByteString -> Name
-fromQualified = go (Name "" "") . unpack
+instance Ord Ident where
+    compare = comparing identBS
+
+data NameType
+    -- | A name that has been determined to be from a different module, or is
+    -- qualified.
+    = External ModuleName
+    -- | A name that the user has defined in the current module.
+    | Internal
+    deriving (Show, Eq)
+
+data Name
+    = Name {
+        -- | The name of the module the identifier originates from.
+        nameType :: NameType,
+        nameBS :: ByteString,
+        -- | The un-qualified name of the identifier that appears in
+        -- the source code
+        nameLoc :: SourceLoc
+    }
+    deriving (Show)
+
+instance Eq Name where
+    Name nt1 id1 _loc1 == Name nt2 id2 _loc2 = nt1 == nt2 && id1 == id2
+
+-- | Creates an 'external' name (i.e. a name that was defined in a different
+-- module). If the given `@Ident@` is qualified, the qualifier *must* equal the
+-- given module name.
+external :: ModuleName -> Ident -> Name
+external mdl ident
+    | BS.length qual > 0 && qual /= mdl = error $
+        "Qualifier does not match expected module name.\n\
+        \    Expected: " ++ unpack mdl ++ "\n\
+        \     But got: " ++ unpack qual
+    | otherwise = Name (External mdl) iden loc
     where
-        go :: Name -> String -> Name
-        go (Name _mdl "") "" = error "fromQualified: empty identifier"
-        go name "" = name
-        go (Name "" _iden) "::" = error
-            "fromQualified: illegal trailing \"::\""
-        go name@(Name mdl iden) (':':':':rest) = case go name rest of
-            Name "" iden' -> Name mdl iden'
-            Name mdl' "" -> Name mdl' iden
-            name' -> name'
-        go (Name "" iden) str =
-            let (idenStr, rest) = span (/= ':') str
-                iden' = fromString idenStr
-            in go (Name iden iden') rest
-        go (Name mdl iden) str =
-            let (idenStr, rest) = span (/= ':') str
-                mdl' = BS.concat [mdl, "_", iden]
-                iden' = fromString idenStr
-            in go (Name mdl' iden') rest
+        (qual, Ident iden loc) = fromQualified ident
+
+-- | Creates an 'internal' name (i.e. a name that was defined in the current
+-- module). If the given `@Ident@` is qualified, `@internal@` will actually
+-- create an external one, with the qualifier as the module name.
+internal :: Ident -> Name
+internal ident
+    | BS.length qual == 0 = Name Internal iden loc
+    | otherwise = Name (External qual) iden loc
+    where
+        (qual, Ident iden loc) = fromQualified ident
+
+stripColons :: ModuleName -> ModuleName
+stripColons = BS.dropWhile (== ':') . dropWhileEnd (== ':')
+
+fromQualified :: Ident -> (ModuleName, Ident)
+fromQualified (Ident name loc) =
+    let (mdl, name') = spanEnd (/= ':') name
+    in (stripColons mdl, Ident (stripColons name') loc)
 
 display :: Name -> ByteString
-display (Name mdl iden) = BS.concat [mdl, "_", iden]
-
-mkIden :: String -> Iden
-mkIden = fromString
+display (Name (External qual) name _loc) = BS.concat [qual, "::", name]
+display (Name Internal name _loc) = name
 
 -- | `@catIdent@ name suffix` appends `suffix` to the identifier
 -- part of `name`
 catIdent :: Name -> ByteString -> Name
-catIdent (Name mdl iden) = Name mdl . append iden
+catIdent name@Name{nameBS=iden} sfx = name{ nameBS = append iden sfx }
+
+-- | THIS SHOULD ONLY BE USED FOR TESTING PURPOSES
+instance IsString Ident where
+    fromString str = Ident (fromString str) zeroLoc

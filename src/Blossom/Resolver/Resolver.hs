@@ -5,7 +5,7 @@ module Blossom.Resolver.Resolver (
     -- resolveAST,
 ) where
 
-import Blossom.Common.Name (Iden, Name, fromQualified, display)
+import Blossom.Common.Name (Ident, Name, display, external)
 import qualified Blossom.LLTree.Body as LLT
 -- import qualified Blossom.LLTree.Closure as LLT
 import qualified Blossom.LLTree.Definition as LLT
@@ -14,7 +14,6 @@ import qualified Blossom.LLTree.Module as LLT
 import qualified Blossom.LLTree.Type as LLT
 import qualified Blossom.Parsing.AbsSynTree as AST
 import Blossom.Resolver.Monad
-import qualified Data.ByteString as BS (concat)
 import Data.ByteString.Char8 (unpack)
 
 
@@ -30,7 +29,7 @@ resolveAST (AST.ModuleAST imports defs) = do
 
 resolveImport :: AST.Import -> Resolver LLT.Import
 resolveImport (AST.Import name) = do
-    name' <- resolveIden name
+    name' <- resolveIdent name
     let path = map (\ch ->
             if ch == '_' then '/' else ch
             ) (unpack (display name'))
@@ -42,7 +41,7 @@ resolveImport (AST.Import name) = do
 -- match against the same inputs.
 resolveTopExprs :: [AST.TopLevelExpr] -> Resolver ()
 resolveTopExprs (AST.FuncDecl iden typ : exprs) = do
-    name <- resolveIden iden
+    name <- resolveIdent iden
     let (defs, remExprs) = takeFuncDefs iden exprs
     (params, body) <- mergeDefs defs
     (params', retType) <- applyParams params typ
@@ -85,7 +84,7 @@ applyParams (p:ps) (t1 AST.:-> t2) = do
 applyParams (_:_) AST.TypeCon{} = error
     "Too many parameters for the given function type."
 
-takeFuncDefs :: Iden -> [AST.TopLevelExpr]
+takeFuncDefs :: Ident -> [AST.TopLevelExpr]
     -> ([(AST.Params, AST.Expr)], [AST.TopLevelExpr])
 takeFuncDefs declName allExprs@(AST.FuncDef defName params body : exprs)
     | declName == defName =
@@ -96,14 +95,13 @@ takeFuncDefs _ exprs = ([], exprs)
 
 -- TODO!!!
 resolvePattern :: AST.Pattern -> Resolver Name
-resolvePattern (AST.Param name) = resolveIden name
+resolvePattern (AST.Param name) = resolveIdent name
 resolvePattern AST.CtorPtrn{} = error "Patterns are not supported (yet)."
 
 resolveExpr :: AST.Expr -> Resolver LLT.Body
 resolveExpr _ = error "Expressions not supported (yet)"
 
-resolveIden :: Iden -> Resolver Name
-resolveIden iden = do
+resolveIdent :: Ident -> Resolver Name
+resolveIdent ident = do
     mdl <- moduleName
-    let name = fromQualified (BS.concat [mdl, "::", iden])
-    return $! name
+    return $! external mdl ident

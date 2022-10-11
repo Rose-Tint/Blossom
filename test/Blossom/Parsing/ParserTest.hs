@@ -32,6 +32,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                 \    = Failure (oldMsg ++ \"\\n~~and\\n\" ++ newMsg);\n\
                 \func fail msg (Success i)\n\
                 \    = Failure (msg ++ \"\\nLast value: \" ++ pretty i);\n"
+                "" ""
             expected = Right $ ModuleAST {
                 moduleImports = [Import "Text::Pretty"],
                 moduleTopExprs = reverse [

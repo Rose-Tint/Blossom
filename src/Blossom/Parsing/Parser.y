@@ -5,7 +5,7 @@ module Blossom.Parsing.Parser (
 ) where
 
 import Blossom.Common.Literal (Literal(..))
-import Blossom.Common.Name (Iden)
+import Blossom.Common.Name (ModuleName, Ident)
 import Blossom.Parsing.AbsSynTree (
     Case(..),
     Constructor(..),
@@ -22,7 +22,7 @@ import Blossom.Parsing.Lexer (
     alexError,
     getPrettyAlexPosn,
     lexer,
-    runAlex,
+    runLexer,
     )
 import Blossom.Parsing.Token (Token(..))
 import Data.ByteString.Lazy as BS (ByteString, toStrict, readFile)
@@ -95,7 +95,7 @@ TopLevelExpr :: { TopLevelExpr }
 -- | The part that prefixes both function
 -- declarations *and* definitions
 -- TODO: abstract `small_id` and `operator` to one.
-FuncOpener :: { Iden }
+FuncOpener :: { Ident }
     : func small_id { $2 }
     | func "(" operator ")" { $3 }
 
@@ -199,13 +199,13 @@ parseError tok = do
     alexError $ "Error parsing token on " ++ posStr
         ++ "\n    Unexpected token: `" ++ show tok ++ "`"
 
-parse :: ByteString -> Either String ModuleAST
-parse = flip runAlex blossomParser
+parse :: ByteString -> ModuleName -> FilePath -> Either String ModuleAST
+parse src mdl path = runLexer src mdl path blossomParser
 
-parseFile :: FilePath -> IO (Either String ModuleAST)
-parseFile path = do
+parseFile :: FilePath -> ModuleName -> IO (Either String ModuleAST)
+parseFile path mdl = do
     contents <- BS.readFile path
     -- the strictness of `contents` is important here!
-    let result = parse $! contents
+    let result = parse (contents `seq` contents) mdl path
     return result
 }

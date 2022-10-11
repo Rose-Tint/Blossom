@@ -7,7 +7,7 @@ module Blossom.LLTree.Type (
     fromASTType,
 ) where
 
-import Blossom.Common.Name (Name)
+import Blossom.Common.Name (Ident(Ident), Name)
 import qualified Blossom.Parsing.AbsSynTree as AST (Type(..))
 
 
@@ -32,16 +32,16 @@ type Var = Typed Name
 
 
 fromASTType :: AST.Type -> Type
-fromASTType (AST.TypeCon "I64" args) = prim I64 args
-fromASTType (AST.TypeCon "I32" args) = prim I32 args
-fromASTType (AST.TypeCon "I16" args) = prim I16 args
-fromASTType (AST.TypeCon "I8" args) = prim I8 args
-fromASTType (AST.TypeCon "Boolean" args) = prim I8 args
-fromASTType (AST.TypeCon "F64" args) = prim F64 args
-fromASTType (AST.TypeCon "F32" args) = prim F32 args
-fromASTType (AST.TypeCon "Char" args) = prim Char args
-fromASTType (AST.TypeCon "String" args) = prim String args
-fromASTType (AST.TypeCon "Unit" args) = prim Unit args
+fromASTType (AST.TypeCon (Ident "I64" _) args) = prim I64 args
+fromASTType (AST.TypeCon (Ident "I32" _) args) = prim I32 args
+fromASTType (AST.TypeCon (Ident "I16" _) args) = prim I16 args
+fromASTType (AST.TypeCon (Ident "I8" _) args) = prim I8 args
+fromASTType (AST.TypeCon (Ident "Boolean" _) args) = prim I8 args
+fromASTType (AST.TypeCon (Ident "F64" _) args) = prim F64 args
+fromASTType (AST.TypeCon (Ident "F32" _) args) = prim F32 args
+fromASTType (AST.TypeCon (Ident "Char" _) args) = prim Char args
+fromASTType (AST.TypeCon (Ident "String" _) args) = prim String args
+fromASTType (AST.TypeCon (Ident "Unit" _) args) = prim Unit args
 fromASTType (AST.TypeCon _name args) = Struct (map fromASTType args)
 fromASTType (t1 AST.:-> t2) = case fromASTType t2 of
     FuncType ret pars -> FuncType ret (t1':pars)

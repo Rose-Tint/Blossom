@@ -4,7 +4,7 @@
 
 module Blossom.Parsing.Lexer (
     Alex(..),
-    runAlex,
+    runLexer,
     alexError,
     alexGetInput,
     lexer,
@@ -12,7 +12,10 @@ module Blossom.Parsing.Lexer (
     getPrettyAlexPosn,
 ) where
 
+import Blossom.Common.Name (ModuleName, Ident(..))
+import Blossom.Common.Source (Position, SourceLoc(..), mkPos)
 import Blossom.Parsing.Token (Token(..))
+import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy.Char8 as CBS (foldl', unpack)
 -- import qualified Data.ByteString.Lazy as ByteString -- imported by Alex
 import Data.Char (digitToInt)
@@ -84,57 +87,80 @@ alexEOF = return TokEnd
 --     Int64                     -- bytes consumed so far
 --     )
 
-data AlexUserState = AlexUserState
+data AlexUserState = AlexUserState {
+    moduleName :: ModuleName,
+    filePath :: FilePath
+    }
 
 -- AlexUserState initialization function
 alexInitUserState :: AlexUserState
-alexInitUserState = AlexUserState
+alexInitUserState = AlexUserState mempty mempty
 
+setUserState :: AlexUserState -> Alex ()
+setUserState us = Alex $ \st -> Right (st{alex_ust=us}, ())
+
+getUserState :: Alex AlexUserState
+getUserState = Alex $ \st -> Right (st, alex_ust st)
+
+posnToPos :: AlexPosn -> Position
+posnToPos (AlexPn ln col off) = mkPos ln col off
+
+posnToLoc :: AlexPosn -> Alex SourceLoc
+posnToLoc posn = do
+    let pos = posnToPos posn
+    us <- getUserState
+    let mdl = moduleName us
+        path = filePath us
+        loc = SourceLoc path mdl pos pos
+    return loc
 
 integer :: AlexInput -> Int64 -> Alex Token
-integer (_pos, _prev, input, _cons) len = return $ TokInteger $
+integer (_posn, _prev, input, _cons) len = return $ TokInteger $
     CBS.foldl' (\n ch ->
         n * 10 + fromIntegral (digitToInt ch)
         ) 0 (ByteString.take len input)
 
 float :: AlexInput -> Int64 -> Alex Token
-float (_pos, _prev, input, _cons) len = return $ TokFloat $
+float (_posn, _prev, input, _cons) len = return $ TokFloat $
     read (CBS.unpack (ByteString.take len input))
 
 char :: AlexInput -> Int64 -> Alex Token
-char (_pos, _prev, input, _cons) len = return $ TokChar
+char (_posn, _prev, input, _cons) len = return $ TokChar
     (read (CBS.unpack $ ByteString.take len input) :: Char)
 
 string :: AlexInput -> Int64 -> Alex Token
-string (_pos, _prev, input, _cons) len = return $ TokString $
+string (_posn, _prev, input, _cons) len = return $ TokString $
     -- drop quotation marks
     ByteString.drop 1 (ByteString.take (len - 1) input)
 
 smallId :: AlexInput -> Int64 -> Alex Token
-smallId (_pos, _prev, input, _cons) len =
-    let name = ByteString.toStrict $ ByteString.take len input
-    in return $ TokSmallId $ name
+smallId (posn, _prev, input, _cons) len = do
+    let iden = ByteString.toStrict $ ByteString.take len input
+    loc <- posnToLoc posn
+    return $ TokSmallId $ Ident iden loc
 
 bigId :: AlexInput -> Int64 -> Alex Token
-bigId (_pos, _prev, input, _cons) len =
-    let name = ByteString.toStrict $ ByteString.take len input
-    in return $ TokBigId $ name
+bigId (posn, _prev, input, _cons) len = do
+    let iden = ByteString.toStrict $ ByteString.take len input
+    loc <- posnToLoc posn
+    return $ TokBigId $ Ident iden loc
 
 operator :: AlexInput -> Int64 -> Alex Token
-operator (_pos, _prev, input, _cons) len =
-    let name = ByteString.toStrict $ ByteString.take len input
-    in return $ TokOperator $ name
+operator (posn, _prev, input, _cons) len = do
+    let iden = ByteString.toStrict $ ByteString.take len input
+    loc <- posnToLoc posn
+    return $ TokOperator $ Ident iden loc
 
 reserved :: Token -> AlexInput -> Int64 -> Alex Token
-reserved tok (_pos, _prev, _input, _) _len = return tok
+reserved tok (_posn, _prev, _input, _) _len = return tok
 
 lexer :: (Token -> Alex a) -> Alex a
 lexer = (alexMonadScan >>=)
 
 -- | Turns a bytestring into either an error message (`@Left@`), or
 -- a list of tokens. This should really only be used for testing.
-tokenize :: ByteString.ByteString -> Either String [Token]
-tokenize bs = runAlex bs tokenizer
+tokenize :: ByteString -> ModuleName -> FilePath -> Either String [Token]
+tokenize src mdl path = runLexer src mdl path tokenizer
     where
         tokenizer :: Alex [Token]
         tokenizer = do
@@ -144,6 +170,12 @@ tokenize bs = runAlex bs tokenizer
             else do
                 toks <- tokenizer
                 return (tok:toks)
+
+runLexer :: ByteString -> ModuleName -> FilePath -> Alex a -> Either String a
+runLexer src mdl path alex = runAlex src alex
+    where
+        us = AlexUserState mdl path
+        alex' = setUserState us >> alex
 
 getPrettyAlexPosn :: Alex String
 getPrettyAlexPosn = do

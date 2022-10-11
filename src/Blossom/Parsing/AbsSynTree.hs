@@ -11,7 +11,7 @@ module Blossom.Parsing.AbsSynTree (
     Type(..),
 ) where
 
-import Blossom.Common.Name (Iden)
+import Blossom.Common.Name (Ident)
 import Blossom.Common.Literal (Literal)
 
 
@@ -21,18 +21,18 @@ data ModuleAST = ModuleAST {
     }
     deriving (Show, Eq)
 
-newtype Import = Import Iden
+newtype Import = Import Ident
     deriving (Show, Eq)
 
 data TopLevelExpr
-    = FuncDecl Iden Type
-    | FuncDef Iden Params Expr
-    | DataDef Iden [Constructor]
+    = FuncDecl Ident Type
+    | FuncDef Ident Params Expr
+    | DataDef Ident [Constructor]
     deriving (Show, Eq)
 
 data Pattern
-    = Param Iden
-    | CtorPtrn Iden [Pattern]
+    = Param Ident
+    | CtorPtrn Ident [Pattern]
     deriving (Show, Eq)
 
 type Params = [Pattern]
@@ -40,7 +40,7 @@ type Params = [Pattern]
 type Param = Pattern
 
 data Expr
-    = VarExpr Iden
+    = VarExpr Ident
     | LitExpr Literal
     -- | SHOULD NOT BE EMPTY (but NonEmpty makes for ugly code).
     -- A list of function applications. It is done this
@@ -58,11 +58,11 @@ data Case = Case Pattern Expr
 
 data Constructor
     = Constructor {
-        ctorName :: Iden,
+        ctorName :: Ident,
         ctorParams :: Type
     }
     | Nullary {
-        ctorName :: Iden
+        ctorName :: Ident
     }
     deriving (Show, Eq)
 
@@ -71,7 +71,7 @@ infixr 9 :->
 -- | !!!ONLY TO BE USED PRE-RENAMING!!!
 data Type
     = TypeCon {
-        typeName :: Iden,
+        typeName :: Ident,
         typeArgs :: [Type]
     }
     -- TODO: Type variables

@@ -14,7 +14,7 @@ main = do
     cmd <- parseCmdLine
     let sourceFiles = cmdSourceFiles cmd
     mapM_ (\path -> do
-        eAst <- parseFile path
+        eAst <- parseFile path path
         case eAst of
             Left errMsg -> putStrLn errMsg
             Right !ast -> do
