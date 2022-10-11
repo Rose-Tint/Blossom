@@ -14,10 +14,11 @@ main = do
     cmd <- parseCmdLine
     let sourceFiles = cmdSourceFiles cmd
     mapM_ (\path -> do
-        eAst <- parseFile path path
+        let mdl = pack path
+        eAst <- parseFile path mdl
         case eAst of
             Left errMsg -> putStrLn errMsg
             Right !ast -> do
-                let !_ = runResolver (pack path) path (resolveAST ast)
+                let !_ = runResolver mdl path (resolveAST ast)
                 return ()
         ) sourceFiles
