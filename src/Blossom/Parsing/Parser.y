@@ -1,4 +1,7 @@
 {
+{-# OPTIONS_GHC -fno-prof-auto #-}
+{-# OPTIONS_GHC -fprof-auto-exported #-}
+
 module Blossom.Parsing.Parser (
     parseFile,
     parse,
@@ -19,13 +22,13 @@ import Blossom.Parsing.AbsSynTree (
     )
 import Blossom.Parsing.Lexer (
     Alex,
-    alexError,
-    getSourceLoc,
+    lexError,
     lexer,
     runLexer,
     )
 import Blossom.Parsing.Token (Token(..))
 import Data.ByteString.Lazy as BS (ByteString, toStrict, readFile)
+import Prettyprinter (pretty, (<+>))
 }
 
 

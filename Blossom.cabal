@@ -18,8 +18,8 @@ common base-depends
         Haskell2010
     default-extensions:
         BangPatterns
+    other-extensions:
         OverloadedStrings
-    -- other-extensions:
     ghc-options:
         -fhide-source-paths
         -Wall
@@ -101,7 +101,7 @@ executable blossom-prof
         "-with-rtsopts=-p -sBlossom-prof.stat"
         -O2
         -threaded
-        -fprof-auto
+        -fprof-auto-top
 
 test-suite blossom-test
     import:
