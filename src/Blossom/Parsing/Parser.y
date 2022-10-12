@@ -20,7 +20,7 @@ import Blossom.Parsing.AbsSynTree (
 import Blossom.Parsing.Lexer (
     Alex,
     alexError,
-    getPrettyAlexPosn,
+    getSourceLoc,
     lexer,
     runLexer,
     )
@@ -194,10 +194,7 @@ Constructor :: { Constructor }
 
 {
 parseError :: Token -> Alex a
-parseError tok = do
-    posStr <- getPrettyAlexPosn
-    alexError $ "Error parsing token on " ++ posStr
-        ++ "\n    Unexpected token: `" ++ show tok ++ "`"
+parseError tok = lexError $ pretty "Unexpected token:" <+> pretty tok
 
 parse :: ByteString -> ModuleName -> FilePath -> Either String ModuleAST
 parse src mdl path = runLexer src mdl path blossomParser

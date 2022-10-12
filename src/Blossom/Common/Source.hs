@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Blossom.Common.Source (
     Line,
@@ -26,13 +27,14 @@ import qualified Data.ByteString.Char8 as BS (
     takeWhileEnd,
     )
 import Data.Ord (comparing)
+import Prettyprinter (Pretty(pretty))
 
 
 newtype Line = Line { unLine :: Word }
-    deriving (Show, Eq, Ord, Enum, Num)
+    deriving (Show, Eq, Ord, Enum, Num, Pretty)
 
 newtype Column = Column { unColumn :: Word }
-    deriving (Show, Eq, Ord, Enum, Num)
+    deriving (Show, Eq, Ord, Enum, Num, Pretty)
 
 newtype Offset = Offset { unOffset :: Word }
     deriving (Show, Eq, Ord, Enum, Num)
@@ -115,3 +117,9 @@ zeroPos = Pos 0 0 0
 
 zeroLoc :: SourceLoc
 zeroLoc = SourceLoc mempty mempty zeroPos zeroPos
+
+instance Pretty SourceLoc where
+    pretty (SourceLoc path _mdl begin _end) = pretty path <> ":" <> pretty begin
+
+instance Pretty Position where
+    pretty (Pos ln col _off) = pretty ln <> ":" <> pretty col

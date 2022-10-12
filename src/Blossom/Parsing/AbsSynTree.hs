@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Blossom.Parsing.AbsSynTree (
     ModuleAST(..),
     Import(..),
@@ -13,6 +15,7 @@ module Blossom.Parsing.AbsSynTree (
 
 import Blossom.Common.Name (Ident)
 import Blossom.Common.Literal (Literal)
+import Prettyprinter (Pretty(pretty), hsep, (<+>), parens)
 
 
 data ModuleAST = ModuleAST {
@@ -77,3 +80,8 @@ data Type
     -- TODO: Type variables
     | Type :-> Type
     deriving (Show, Eq)
+
+instance Pretty Type where
+    pretty (TypeCon name args) = pretty name <+> hsep (map pretty args)
+    pretty (t1@(:->){} :-> t2) = parens (pretty t1) <+> "->" <+> pretty t2
+    pretty (t1 :-> t2) = pretty t1 <+> "->" <+> pretty t2

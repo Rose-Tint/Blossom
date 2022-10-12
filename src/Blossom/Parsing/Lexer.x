@@ -5,11 +5,9 @@
 module Blossom.Parsing.Lexer (
     Alex(..),
     runLexer,
-    alexError,
-    alexGetInput,
+    lexError,
     lexer,
     tokenize,
-    getPrettyAlexPosn,
 ) where
 
 import Blossom.Common.Name (ModuleName, Ident(..))
@@ -19,6 +17,7 @@ import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy.Char8 as CBS (foldl', unpack)
 -- import qualified Data.ByteString.Lazy as ByteString -- imported by Alex
 import Data.Char (digitToInt)
+import Prettyprinter (Doc, Pretty(..), line, nest, (<+>))
 
 }
 
@@ -114,6 +113,12 @@ posnToLoc posn = do
         loc = SourceLoc path mdl pos pos
     return loc
 
+getSourceLoc :: Alex SourceLoc
+getSourceLoc = do
+    (posn, _, _, _) <- alexGetInput
+    loc <- posnToLoc posn
+    return loc
+
 integer :: AlexInput -> Int64 -> Alex Token
 integer (_posn, _prev, input, _cons) len = return $ TokInteger $
     CBS.foldl' (\n ch ->
@@ -177,13 +182,9 @@ runLexer src mdl path alex = runAlex src alex
         us = AlexUserState mdl path
         alex' = setUserState us >> alex
 
-getPrettyAlexPosn :: Alex String
-getPrettyAlexPosn = do
-    ((AlexPn _off ln col), _, _, _) <- alexGetInput
-    return $! "line " ++ show ln ++ ", column " ++ show col
-
-lexError :: Alex a
-lexError = do
-    posStr <- getPrettyAlexPosn
-    alexError $ "Lexical error on " ++ posStr
+lexError :: Doc ann -> Alex a
+lexError doc = do
+    loc <- getSourceLoc
+    alexError $ show $ pretty loc <> ":" <+> pretty "Error:" <> line
+        <> nest 4 doc
 }

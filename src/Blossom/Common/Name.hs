@@ -1,4 +1,7 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 module Blossom.Common.Name (
     Ident(..),
@@ -18,6 +21,7 @@ import qualified Data.ByteString.Char8 as BS (concat, length, dropWhile)
 import Data.ByteString.Char8 (unpack, spanEnd, dropWhileEnd)
 import Data.Ord (comparing)
 import Data.String (IsString(..))
+import Prettyprinter (Pretty(pretty))
 
 
 type ModuleName = ByteString
@@ -98,6 +102,19 @@ display (Name Internal name _loc) = name
 catIdent :: Name -> ByteString -> Name
 catIdent name@Name{nameBS=iden} sfx = name{ nameBS = append iden sfx }
 
+instance Pretty ModuleName where
+    pretty = pretty . unpack
+
 -- | THIS SHOULD ONLY BE USED FOR TESTING PURPOSES
 instance IsString Ident where
     fromString str = Ident (fromString str) zeroLoc
+
+instance Pretty Ident where
+    pretty (Ident iden _loc) = pretty (unpack iden :: String)
+
+instance Pretty NameType where
+    pretty (External mdl) = "external (" <> pretty (unpack mdl) <> ")"
+    pretty Internal = "internal"
+
+instance Pretty Name where
+    pretty = pretty . unpack . display
