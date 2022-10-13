@@ -32,7 +32,7 @@
       },
       "type": "shell",
       "label": "Test All",
-      "command": "cabal v2-test all -O2"
+      "command": "cabal v2-test all -O0"
     },
     {
       "group": {
