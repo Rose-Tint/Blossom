@@ -104,7 +104,7 @@ getUserState :: Alex AlexUserState
 getUserState = Alex $ \st -> Right (st, alex_ust st)
 
 posnToPos :: AlexPosn -> Position
-posnToPos (AlexPn ln col off) = mkPos ln col off
+posnToPos (AlexPn off ln col) = mkPos ln col off
 
 posnToLoc :: AlexPosn -> Alex SourceLoc
 posnToLoc posn = do
@@ -179,15 +179,12 @@ tokenize src mdl path = runLexer src mdl path tokenizer
                 return (tok:toks)
 
 runLexer :: ByteString -> ModuleName -> FilePath -> Alex a -> Either String a
-runLexer src mdl path alex = runAlex src alex
-    where
-        us = AlexUserState mdl path
-        alex' = setUserState us >> alex
+runLexer src mdl path alex = runAlex src $
+    setUserState (AlexUserState mdl path) >> alex
 
 lexError :: Doc ann -> Alex a
 lexError doc = do
     loc <- getSourceLoc
     alexError $ show $
-        pretty loc <> pretty ":" <+> pretty "Error:" <> P.line
-        <> nest 4 doc
+        pretty loc <> pretty ": Error:" <> nest 4 (P.line <> doc)
 }
