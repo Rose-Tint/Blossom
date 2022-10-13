@@ -5,7 +5,7 @@ module Blossom.Parsing.LexerTest (
 ) where
 
 import Test.HUnit (Test(..), (@=?))
-
+import Blossom.Common.Name (testIdent)
 import Blossom.Parsing.Lexer (tokenize)
 import Blossom.Parsing.Token (Token(..))
 
@@ -40,28 +40,28 @@ tests = TestLabel "Blossom.Parsing.Lexer" $ TestList [
         TestLabel "operators" $ TestCase $
             let actual = tokenize' ">= .^#* $~% <?--! --@ ~--"
                 expected = Right [
-                    TokOperator ">=",
-                    TokOperator ".^#*",
-                    TokOperator "$~%",
-                    TokOperator "<?--!",
-                    TokOperator "--@",
-                    TokOperator "~--"
+                    operId ">=",
+                    operId ".^#*",
+                    operId "$~%",
+                    operId "<?--!",
+                    operId "--@",
+                    operId "~--"
                     ]
             in expected @=? actual,
         TestLabel "small identifiers" $ TestCase $
             let actual = tokenize' "fo'0 bar' _FooBar"
                 expected = Right [
-                    TokSmallId "fo'0",
-                    TokSmallId "bar'",
-                    TokSmallId "_FooBar"
+                    smolId "fo'0",
+                    smolId "bar'",
+                    smolId "_FooBar"
                     ]
             in expected @=? actual,
         TestLabel "big identifiers" $ TestCase $
             let actual = tokenize' "F0o Bar' Foo'Bar"
                 expected = Right [
-                    TokBigId "F0o",
-                    TokBigId "Bar'",
-                    TokBigId "Foo'Bar"
+                    bigId "F0o",
+                    bigId "Bar'",
+                    bigId "Foo'Bar"
                     ]
             in expected @=? actual,
         TestLabel "mixed" $ TestList [
@@ -73,9 +73,9 @@ tests = TestLabel "Blossom.Parsing.Lexer" $ TestList [
                         TokFloat 45.6,
                         TokString "str",
                         TokChar ' ',
-                        TokOperator "!#$%&*+.<=>?@^|-~",
-                        TokSmallId "aC'5a",
-                        TokBigId "Kw'2"
+                        operId "!#$%&*+.<=>?@^|-~",
+                        smolId "aC'5a",
+                        bigId "Kw'2"
                         ]
                 in expected @=? actual
             ]
@@ -83,3 +83,12 @@ tests = TestLabel "Blossom.Parsing.Lexer" $ TestList [
     ]
     where
         tokenize' src = tokenize src "" ""
+
+smolId :: String -> Token
+smolId = TokSmallId . testIdent
+
+bigId :: String -> Token
+bigId = TokBigId . testIdent
+
+operId :: String -> Token
+operId = TokOperator . testIdent

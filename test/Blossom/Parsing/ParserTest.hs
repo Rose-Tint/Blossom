@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 module Blossom.Parsing.ParserTest (
     tests,
@@ -6,6 +7,7 @@ module Blossom.Parsing.ParserTest (
 
 import Test.HUnit (Test(..), (@=?))
 import Blossom.Common.Literal (Literal(StringLit))
+import Blossom.Common.Name (Ident, testIdent)
 import Blossom.Parsing.AbsSynTree (
     ModuleAST(..),
     Import(..),
@@ -16,6 +18,7 @@ import Blossom.Parsing.AbsSynTree (
     Type(..),
     )
 import Blossom.Parsing.Parser (parse)
+import Data.String (IsString(fromString))
 
 
 tests :: Test
@@ -80,3 +83,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                 }
         in expected @=? actual
     ]
+
+-- | orphan instance for testing purposes only
+instance IsString Ident where
+    fromString = testIdent

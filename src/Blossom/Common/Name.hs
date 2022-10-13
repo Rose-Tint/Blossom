@@ -13,14 +13,15 @@ module Blossom.Common.Name (
     external,
     internal,
     stripColons,
+    testIdent,
 ) where
 
-import Blossom.Common.Source (SourceLoc, zeroLoc)
+import Blossom.Common.Source (SourceLoc, HasLoc(getLoc), testLoc)
 import Data.ByteString (ByteString, append)
 import qualified Data.ByteString.Char8 as BS (concat, length, dropWhile)
 import Data.ByteString.Char8 (unpack, spanEnd, dropWhileEnd)
 import Data.Ord (comparing)
-import Data.String (IsString(..))
+import Data.String (fromString)
 import Prettyprinter (Pretty(pretty))
 
 
@@ -102,12 +103,11 @@ display (Name Internal name _loc) = name
 catIdent :: Name -> ByteString -> Name
 catIdent name@Name{nameBS=iden} sfx = name{ nameBS = append iden sfx }
 
+testIdent :: String -> Ident
+testIdent iden = Ident (fromString iden) testLoc
+
 instance Pretty ModuleName where
     pretty = pretty . unpack
-
--- | THIS SHOULD ONLY BE USED FOR TESTING PURPOSES
-instance IsString Ident where
-    fromString str = Ident (fromString str) zeroLoc
 
 instance Pretty Ident where
     pretty (Ident iden _loc) = pretty (unpack iden :: String)
@@ -118,3 +118,9 @@ instance Pretty NameType where
 
 instance Pretty Name where
     pretty = pretty . unpack . display
+
+instance HasLoc Ident where
+    getLoc = identLoc
+
+instance HasLoc Name where
+    getLoc = nameLoc

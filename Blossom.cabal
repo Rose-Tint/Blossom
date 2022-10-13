@@ -78,8 +78,8 @@ executable blossom-exe
     main-is:
         Main.hs
     build-depends:
-        blossom    >= 0.1.0.0,
-        bytestring >= 0.10.12
+        blossom       >= 0.1.0.0,
+        prettyprinter >= 1.7.1
     hs-source-dirs:
         app
     ghc-options:
