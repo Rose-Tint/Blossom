@@ -12,7 +12,7 @@ module Blossom.Backend.LLVM.AST (
 
 import Blossom.Backend.LLVM.ToLLVM (llvm)
 import Blossom.Common.Literal (Literal(..))
-import Blossom.Common.Name (Name, catIdent, display)
+import Blossom.Common.Name (ModuleName(MdlName), Name, affixName, display)
 import Blossom.LLTree.Module (ModuleLLT(..))
 import Blossom.LLTree.Definition (Definition(..), Param(..))
 import Blossom.LLTree.Type (Type(..), Typed(..))
@@ -28,7 +28,7 @@ import LLVM.IRBuilder hiding (buildModule)
 
 
 genModule :: ModuleLLT -> LLVM.Module
-genModule (ModuleLLT name path _imports defs) = LLVM.Module {
+genModule (ModuleLLT (MdlName name) path _imports defs) = LLVM.Module {
     LLVM.moduleName = toShort name,
     LLVM.moduleSourceFileName = fromString path,
     LLVM.moduleDataLayout = Just (defaultDataLayout LittleEndian),
@@ -56,7 +56,7 @@ genDefn DataDef{} = return ()
 -- TODO
 genClosure :: Name -> Closure -> ClosureType -> ModuleBuilder ()
 genClosure name closure closType = do
-    let name' = catIdent name "_closure"
+    let name' = affixName name "_closure"
     case closType of
         StaticFuncClosure -> return ()
         DynamicFuncClosure -> do

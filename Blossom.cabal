@@ -39,6 +39,8 @@ library
         Blossom.Cmd,
         Blossom.Common.Literal,
         Blossom.Common.Name,
+        Blossom.Common.Name.Ident,
+        Blossom.Common.Name.Module,
         Blossom.Common.Source,
         Blossom.LLTree.Body,
         Blossom.LLTree.Closure,

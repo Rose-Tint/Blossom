@@ -22,6 +22,7 @@ module Blossom.Common.Source (
     testLoc,
 ) where
 
+import Blossom.Common.Name.Module (ModuleName)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BS (
     splitAt,
@@ -48,7 +49,7 @@ newtype Offset = Offset { unOffset :: Word }
 data SourceLoc
     = SourceLoc {
         locPath :: FilePath,
-        locModule :: ByteString,
+        locModule :: ModuleName,
         locBegin :: Position,
         locEnd :: Position
     }

@@ -55,7 +55,7 @@ runResolverT mdl path res = evalStateT (runExceptT res) state
     where
         state = newState mdl path
 
-moduleName :: Monad m => ResolverT m ByteString
+moduleName :: Monad m => ResolverT m ModuleName
 moduleName = gets rsModuleName
 
 modulePath :: Monad m => ResolverT m FilePath
