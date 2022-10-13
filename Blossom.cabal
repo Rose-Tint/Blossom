@@ -50,6 +50,7 @@ library
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
         Blossom.Parsing.Token,
+        Blossom.Resolver.Errors,
         Blossom.Resolver.Monad,
         Blossom.Resolver.Resolver
     build-tool-depends:

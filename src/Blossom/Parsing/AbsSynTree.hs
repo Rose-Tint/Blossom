@@ -11,6 +11,7 @@ module Blossom.Parsing.AbsSynTree (
     Params,
     Param,
     Type(..),
+    typeArity,
 ) where
 
 import Blossom.Common.Name (Ident)
@@ -97,6 +98,11 @@ data Type
     -- TODO: Type variables
     | Type :-> Type
     deriving (Show, Eq)
+
+-- | The arity that a function with the given type should have.
+typeArity :: Type -> Int
+typeArity TypeCon{} = 0
+typeArity (_ :-> typ) = 1 + typeArity typ
 
 instance Pretty ModuleAST where
     pretty (ModuleAST imports exprs) =
