@@ -3,8 +3,9 @@ module Main (
     tests,
 ) where
 
-import qualified Blossom.LLVM.ToLLVMTest as ToLLVMTest (tests)
 import qualified Blossom.Common.NameTest as NameTest (tests)
+import qualified Blossom.Common.Name.ModuleTest as ModuleNameTest (tests)
+import qualified Blossom.LLVM.ToLLVMTest as ToLLVMTest (tests)
 import qualified Blossom.Parsing.LexerTest as LexerTest (tests)
 import qualified Blossom.Parsing.ParserTest as ParserTest (tests)
 import Test.HUnit (Test(TestList), runTestTTAndExit)
@@ -15,8 +16,9 @@ main = runTestTTAndExit tests
 
 tests :: Test
 tests = TestList [
-    ToLLVMTest.tests,
     NameTest.tests,
+    ModuleNameTest.tests,
+    ToLLVMTest.tests,
     LexerTest.tests,
     ParserTest.tests
     ]

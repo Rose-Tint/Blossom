@@ -3,11 +3,11 @@ module Main (
 ) where
 
 import Blossom.Cmd (CmdLine(..), parseCmdLine)
+import Blossom.Common.Name.Module (fromFilePath)
 import Blossom.LLTree.Module (ModuleLLT)
 import Blossom.Parsing.Parser (parseFile)
 import Blossom.Resolver.Monad (ResolverT, runResolverT)
 import Blossom.Resolver.Resolver (resolveAST)
-import Data.String (fromString)
 import Prettyprinter (pretty)
 import Prettyprinter.Util (putDocW)
 
@@ -17,7 +17,7 @@ main = do
     cmd <- parseCmdLine
     let sourceFiles = cmdSourceFiles cmd
     mapM_ (\path -> do
-        let mdl = fromString path
+        let mdl = fromFilePath path
         eAst <- parseFile path mdl
         case eAst of
             Left errMsg -> putStrLn errMsg
