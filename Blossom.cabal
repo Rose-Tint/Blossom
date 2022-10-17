@@ -1,5 +1,5 @@
-cabal-version:      2.4
-name:               Blossom
+cabal-version:      3.6
+name:               blossom
 version:            0.1.0.0
 synopsis:           A functional programming language.
 description:        A functional programming language.
@@ -10,7 +10,6 @@ extra-source-files:
     LICENSE
     CHANGELOG.md
     README.md
-
 
 common base-depends
     build-depends:
@@ -31,61 +30,99 @@ common base-depends
         -Wno-unused-do-bind
         -Werror
 
-
-library BlossomLib
+library
     import:
         base-depends
     exposed-modules:
+        Blossom.Backend.LLVM.AST,
+        Blossom.Backend.LLVM.ToLLVM,
         Blossom.Cmd,
+        Blossom.Common.Literal,
         Blossom.Common.Name,
+        Blossom.Common.Name.Ident,
+        Blossom.Common.Name.Module,
+        Blossom.Common.Source,
+        Blossom.LLTree.Body,
+        Blossom.LLTree.Closure,
+        Blossom.LLTree.Definition,
+        Blossom.LLTree.Info,
+        Blossom.LLTree.Module,
+        Blossom.LLTree.Type,
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
         Blossom.Parsing.Token,
-        Blossom.Typing.Type
+        Blossom.Resolver.Errors,
+        Blossom.Resolver.Monad,
+        Blossom.Resolver.Resolver
     build-tool-depends:
         alex:alex   >= 3.2,
         happy:happy >= 1.20
+    -- some dependencies are commented out for convenience
+    -- because they arent needed *yet*, but will be
     build-depends:
+        -- array is needed specifically for Alex
         array                >= 0.5.4,
         bytestring           >= 0.10.12,
-        -- containers           >= 0.6.5,
-        directory            >= 0.10.12,
+        containers           >= 0.6.5,
+        -- directory            >= 0.10.12,
         filepath             >= 1.4.2,
-        -- llvm-hs-pure         >= 9.0.0,
+        -- llvm-hs              >= 9.0.0,
+        llvm-hs-pure         >= 9.0.0,
         mtl                  >= 2.2.2,
-        optparse-applicative >= 0.17.0
+        optparse-applicative >= 0.17.0,
+        prettyprinter        >= 1.7.1
     hs-source-dirs:
         src
 
-
-executable Blossom
+executable blossom-exe
     import:
         base-depends
     main-is:
         Main.hs
     build-depends:
-        BlossomLib
+        blossom       >= 0.1.0.0,
+        prettyprinter >= 1.7.1
     hs-source-dirs:
         app
     ghc-options:
         -threaded
 
-test-suite Test
+-- https://nikita-volkov.github.io/profiling-cabal-projects/
+-- https://downloads.haskell.org/ghc/9.0.1/docs/html/users_guide/profiling.html
+executable blossom-prof
+    import:
+        base-depends
+    main-is:
+        Main.hs
+    build-depends:
+        blossom       >= 0.1.0.0,
+        prettyprinter >= 1.7.1
+    hs-source-dirs:
+        app
+    ghc-options:
+        "-with-rtsopts=-p -sBlossom-prof.stat"
+        -O2
+        -threaded
+        -fprof-auto-top
+
+test-suite blossom-test
     import:
         base-depends
     type:
         exitcode-stdio-1.0
+    other-modules:
+        Blossom.Common.NameTest,
+        Blossom.Common.Name.ModuleTest,
+        Blossom.LLVM.ToLLVMTest,
+        Blossom.Parsing.LexerTest,
+        Blossom.Parsing.ParserTest
+    build-depends:
+        blossom     >= 0.1.0.0,
+        bytestring  >= 0.10.12,
+        HUnit       >= 1.6.2.0
     main-is:
         Test.hs
-    other-modules:
-        Blossom.Parsing.LexerTest,
-        Blossom.Parsing.ParserTest,
-        Blossom.RenameTest
     hs-source-dirs:
-        app,
-        test
-    build-depends:
-        BlossomLib >= 0.1.0.0,
-        bytestring >= 0.10.12,
-        HUnit      >= 1.6.2.0
+        test,
+        app

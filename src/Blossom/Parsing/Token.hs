@@ -1,27 +1,31 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Blossom.Parsing.Token (
     Token(..),
-    mkSmallId,
-    mkBigId,
-    mkOperator,
 ) where
 
-import Data.Int (Int64)
-import Data.ByteString.Lazy (ByteString)
-
-import Blossom.Common.Name (Name, mkName)
+import Blossom.Common.Name (Ident)
+import Data.ByteString.Lazy.Char8 (ByteString, unpack)
+import Prettyprinter (
+    Pretty(pretty),
+    unsafeViaShow,
+    backslash,
+    colon,
+    equals,
+    semi, lparen, rparen, lbrace, rbrace
+    )
 
 
 data Token
-    = TokInteger Int64
+    = TokInteger Integer
     | TokFloat Double
     | TokString ByteString
     | TokChar Char
-    | TokOperator Name
-    | TokSmallId Name
-    | TokBigId Name
+    | TokOperator Ident
+    | TokSmallId Ident
+    | TokBigId Ident
     | TokSemi
     | TokColon
-    | TokDoubleColon
     | TokArrow
     | TokEquals
     | TokEqArrow
@@ -37,15 +41,26 @@ data Token
     | TokEnd
     deriving (Show, Eq)
 
-
--- | Creates a `@TokSmallId@` using a `@String@`
-mkSmallId :: String -> Token
-mkSmallId = TokSmallId . mkName
-
--- | Creates a `@TokBigId@` using a `@String@`
-mkBigId :: String -> Token
-mkBigId = TokBigId . mkName
-
--- | Creates a `@TokOperator@` using a `@String@`
-mkOperator :: String -> Token
-mkOperator = TokOperator . mkName
+instance Pretty Token where
+    pretty (TokInteger n) = pretty n
+    pretty (TokFloat n) = pretty n
+    pretty (TokString bs) = pretty (unpack bs)
+    pretty (TokChar ch) = unsafeViaShow ch
+    pretty (TokOperator ident) = pretty ident
+    pretty (TokSmallId ident) = pretty ident
+    pretty (TokBigId ident) = pretty ident
+    pretty TokSemi = semi
+    pretty TokColon = colon
+    pretty TokArrow = "->"
+    pretty TokEquals = equals
+    pretty TokEqArrow = "=>"
+    pretty TokLParen = lparen
+    pretty TokRParen = rparen
+    pretty TokLBrace = lbrace
+    pretty TokRBrace = rbrace
+    pretty TokBackslash = backslash
+    pretty TokImport = "import"
+    pretty TokFunc = "func"
+    pretty TokData = "data"
+    pretty TokMatch = "match"
+    pretty TokEnd = "end-of-input"

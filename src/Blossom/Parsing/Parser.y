@@ -1,29 +1,34 @@
 {
+{-# OPTIONS_GHC -fno-prof-auto #-}
+{-# OPTIONS_GHC -fprof-auto-exported #-}
+
 module Blossom.Parsing.Parser (
+    parseFile,
     parse,
 ) where
 
-import Blossom.Common.Name (Name)
+import Blossom.Common.Literal (Literal(..))
+import Blossom.Common.Name (ModuleName, Ident)
 import Blossom.Parsing.AbsSynTree (
-    ModuleAST(..),
-    Import(..),
-    TopLevelExpr(..),
-    Pattern(..),
-    Expr(..),
-    Constructor(..),
     Case(..),
+    Constructor(..),
+    Expr(..),
+    Import(..),
+    ModuleAST(..),
     Params,
+    Pattern(..),
+    TopLevelExpr(..),
+    Type(..),
     )
 import Blossom.Parsing.Lexer (
     Alex,
-    runAlex,
+    lexError,
     lexer,
-    getPrettyAlexPosn,
-    alexError,
+    runLexer,
     )
 import Blossom.Parsing.Token (Token(..))
-import Blossom.Typing.Type (Type(..))
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString.Lazy as BS (ByteString, toStrict, readFile)
+import Prettyprinter (pretty, (<+>))
 }
 
 
@@ -45,7 +50,6 @@ import Data.ByteString.Lazy (ByteString)
     "\\"                    { TokBackslash }
     ";"                     { TokSemi }
     ":"                     { TokColon }
-    -- "::"                    { TokDoubleColon }
     "->"                    { TokArrow }
     "="                     { TokEquals }
     "=>"                    { TokEqArrow }
@@ -94,7 +98,7 @@ TopLevelExpr :: { TopLevelExpr }
 -- | The part that prefixes both function
 -- declarations *and* definitions
 -- TODO: abstract `small_id` and `operator` to one.
-FuncOpener :: { Name }
+FuncOpener :: { Ident }
     : func small_id { $2 }
     | func "(" operator ")" { $3 }
 
@@ -120,7 +124,9 @@ Params_ :: { Params }
 
 Pattern :: { Pattern }
     : small_id { Param $1 }
+    | big_id { CtorPtrn $1 [] }
     | "(" big_id Params ")" { CtorPtrn $2 $3 }
+    | "(" Pattern ")" { $2 }
 
 Stmt :: { Expr }
     : Expr ";" { $1 }
@@ -141,10 +147,10 @@ Expr :: { Expr }
 Term :: { Expr }
     : small_id { VarExpr $1 }
     | big_id { VarExpr $1 }
-    | integer { IntExpr $1 }
-    | float { FloatExpr $1 }
-    | char { CharExpr $1 }
-    | string { StringExpr $1 }
+    | integer { LitExpr (IntLit $1) }
+    | float { LitExpr (FloatLit $1) }
+    | char { LitExpr (CharLit $1) }
+    | string { LitExpr (StringLit (toStrict $1)) }
     | operator { VarExpr $1 }
     -- | "(" operator ")" { VarExpr $2 }
     | "(" Expr ")" { $2 }
@@ -191,11 +197,15 @@ Constructor :: { Constructor }
 
 {
 parseError :: Token -> Alex a
-parseError tok = do
-    posStr <- getPrettyAlexPosn
-    alexError $ "Error parsing token on " ++ posStr
-        ++ "\n    Unexpected token: `" ++ show tok ++ "`"
+parseError tok = lexError $ pretty "Unexpected token:" <+> pretty tok
 
-parse :: ByteString -> Either String ModuleAST
-parse = flip runAlex blossomParser
+parse :: ByteString -> ModuleName -> FilePath -> Either String ModuleAST
+parse src mdl path = runLexer src mdl path blossomParser
+
+parseFile :: FilePath -> ModuleName -> IO (Either String ModuleAST)
+parseFile path mdl = do
+    contents <- BS.readFile path
+    -- the strictness of `contents` is important here!
+    let result = parse (contents `seq` contents) mdl path
+    return result
 }

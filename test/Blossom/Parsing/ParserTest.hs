@@ -1,10 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 module Blossom.Parsing.ParserTest (
     tests,
 ) where
 
 import Test.HUnit (Test(..), (@=?))
+import Blossom.Common.Literal (Literal(StringLit))
+import Blossom.Common.Name (Ident, testIdent)
 import Blossom.Parsing.AbsSynTree (
     ModuleAST(..),
     Import(..),
@@ -12,16 +15,17 @@ import Blossom.Parsing.AbsSynTree (
     Pattern(..),
     Expr(..),
     Constructor(..),
+    Type(..),
     )
 import Blossom.Parsing.Parser (parse)
-import Blossom.Typing.Type (Type(..))
+import Data.String (IsString(fromString))
 
 
 tests :: Test
 tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
     TestCase $
         let actual = parse
-                "import Pretty;\n\
+                "import Text::Pretty;\n\
                 \data ExceptI32 {\n\
                 \    Failure : String;\n\
                 \    Success : I32;\n\
@@ -31,8 +35,9 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                 \    = Failure (oldMsg ++ \"\\n~~and\\n\" ++ newMsg);\n\
                 \func fail msg (Success i)\n\
                 \    = Failure (msg ++ \"\\nLast value: \" ++ pretty i);\n"
+                "" ""
             expected = Right $ ModuleAST {
-                moduleImports = [Import "Pretty"],
+                moduleImports = [Import "Text::Pretty"],
                 moduleTopExprs = reverse [
                     DataDef "ExceptI32" (reverse [
                         Constructor "Failure" (TypeCon "String" []),
@@ -52,7 +57,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                             FuncApp [
                                 VarExpr "oldMsg",
                                 VarExpr "++",
-                                StringExpr "\\n~~and\\n",
+                                LitExpr (StringLit "\\n~~and\\n"),
                                 VarExpr "++",
                                 VarExpr "newMsg"
                                 ]
@@ -67,7 +72,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                             FuncApp [
                                 VarExpr "msg",
                                 VarExpr "++",
-                                StringExpr "\\nLast value: ",
+                                LitExpr (StringLit "\\nLast value: "),
                                 VarExpr "++",
                                 VarExpr "pretty",
                                 VarExpr "i"
@@ -78,3 +83,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                 }
         in expected @=? actual
     ]
+
+-- | orphan instance for testing purposes only
+instance IsString Ident where
+    fromString = testIdent

@@ -1,7 +1,4 @@
-// cabal v2-install base --enable-profiling --enable-library-profiling --enable-executable-profiling -j2 --dry-run
 {
-  // Automatically created by phoityne-vscode extension.
-
   "version": "2.0.0",
   "presentation": {
     "reveal": "always",
@@ -14,8 +11,8 @@
         "isDefault": true
       },
       "type": "shell",
-      "label": "Run with C++ backend",
-      "command": "cabal v2-run Blossom"
+      "label": "Run",
+      "command": "cabal v2-run blossom-exe -O0 -- example/IntTree.bl"
     },
     {
       "group": {
@@ -23,33 +20,35 @@
         "isDefault": false
       },
       "type": "shell",
-      "label": "Build All",
-      "command": "cabal v2-build"
+      "label": "Profile",
+      // FYI, for some reason, the "--enable-profiling" optoin makes cabal
+      // compile twice... :(
+      "command": "cabal v2-run blossom-prof -O2 -fprof --enable-profiling -- example/IntTree.bl"
     },
     {
       "group": {
         "kind": "test",
-        "isDefault": false
+        "isDefault": true
       },
       "type": "shell",
       "label": "Test All",
-      "command": "cabal v2-test"
+      "command": "cabal v2-test all -O0"
     },
     {
-      "group": "none",
+      "group": {
+        "kind": "none",
+        "isDefault": false
+      },
       "type": "shell",
-      "label": "GHCI",
-      "command": "cabal v2-repl"
-    },
-    {
-      "group": "none",
-      "type": "shell",
-      "label": "Update Hackage List",
-      "command": "cabal v2-update",
+      "label": "Reinstall Dependencies",
+      "command": "cabal v2-build all -O2 -j4 --only-dependencies --reinstall --enable-profiling",
       "problemMatcher": []
     },
     {
-      "group": "none",
+      "group": {
+        "kind": "none",
+        "isDefault": false
+      },
       "type": "shell",
       "label": "Happy info",
       "command": "happy src/Blossom/Parsing/Parser.y -d -i -s -g -c -a; rm ./src/Blossom/Parsing/Parser.hs",
