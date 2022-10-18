@@ -37,6 +37,7 @@ library
         Blossom.Backend.LLVM.AST,
         Blossom.Backend.LLVM.ToLLVM,
         Blossom.Cmd,
+        Blossom.Common.Arity,
         Blossom.Common.Literal,
         Blossom.Common.Name,
         Blossom.Common.Name.Ident,
