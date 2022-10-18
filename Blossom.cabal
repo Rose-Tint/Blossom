@@ -55,7 +55,9 @@ library
         Blossom.Parsing.Token,
         Blossom.Resolver.Errors,
         Blossom.Resolver.Monad,
-        Blossom.Resolver.Resolver
+        Blossom.Resolver.Resolver,
+        Blossom.Typing.Type,
+        Blossom.Typing.TypeEnv
     build-tool-depends:
         alex:alex   >= 3.2,
         happy:happy >= 1.20
