@@ -142,7 +142,6 @@ Term :: { AbsExpr }
     | char { LitExpr (CharLit $1) }
     | string { LitExpr (StringLit (toStrict $1)) }
     | operator { VarExpr $1 }
-    -- | "(" operator ")" { VarExpr $2 }
     | "(" Expr ")" { $2 }
 
 FuncApp :: { [AbsExpr] }
@@ -151,7 +150,7 @@ FuncApp :: { [AbsExpr] }
 FuncApp_ :: { [AbsExpr] }
     : FuncApp_ Term { $2 : $1 }
     -- | FuncApp_ operator { (VarExpr $2:$1) }
-    | Term Term { [$2, $1] } -- backwards bc it gets reversed
+    | Term Term { [$2, $1] }
 
 MatchCases :: { [AbsCase] }
     : MatchCases MatchCase { $2 : $1 }
