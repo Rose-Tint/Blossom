@@ -8,8 +8,7 @@ import Blossom.Common.Arity (HasArity(..))
 import Blossom.Common.Name (Name)
 import Blossom.Common.Source (HasLoc(..), mergeLocs)
 
--- | Represents a type, parametric in the type used for names. This allows for
--- flexibility, such as using
+
 data Type
     -- | Type constructors (i.e. `I32`, `Map`, `String`)
     = TypeCon Name
