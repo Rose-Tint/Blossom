@@ -119,7 +119,6 @@ test-suite blossom-test
     other-modules:
         Blossom.Common.NameTest,
         Blossom.Common.Name.ModuleTest,
-        Blossom.LLVM.ToLLVMTest,
         Blossom.Parsing.LexerTest,
         Blossom.Parsing.ParserTest
     build-depends:
