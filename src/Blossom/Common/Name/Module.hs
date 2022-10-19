@@ -1,9 +1,11 @@
 module Blossom.Common.Name.Module (
     ModuleName(..),
     fromFilePath,
-    makeValid
+    makeValid,
+    mdlIsEmpty,
 ) where
 
+import qualified Data.ByteString as BS (length)
 import Data.ByteString.Char8 (ByteString, unpack, pack)
 import Data.Char (toUpper, isAlpha, isAlphaNum)
 import Data.List (dropWhileEnd)
@@ -17,8 +19,8 @@ import System.FilePath (
     )
 
 
-newtype ModuleName = MdlName { unMdlName :: ByteString }
-    deriving (Show, Eq)
+newtype ModuleName = MdlName ByteString
+    deriving (Eq)
 
 fromFilePath :: FilePath -> ModuleName
 fromFilePath = makeValid . go . dropExtensions . normalise
@@ -35,7 +37,7 @@ fromFilePath = makeValid . go . dropExtensions . normalise
 -- | This function is fairly expensive, so please try to avoid using it too
 -- often.
 makeValid :: ModuleName -> ModuleName
-makeValid = MdlName . pack . stripColons . go0 . unpack . unMdlName
+makeValid (MdlName mdl) = MdlName $ pack $ stripColons $ go0 $ unpack mdl
     where
         -- `go0` ensures that the first letter is capitalized
         go0 [] = mempty
@@ -60,9 +62,14 @@ makeValid = MdlName . pack . stripColons . go0 . unpack . unMdlName
         eqC = (== ':')
         stripColons = dropWhile eqC . dropWhileEnd eqC
 
+mdlIsEmpty :: ModuleName -> Bool
+mdlIsEmpty (MdlName mdl) = BS.length mdl <= 0
+
+instance Show ModuleName where
+    show (MdlName mdl) = "MdlName " ++ show mdl
 
 instance Pretty ModuleName where
-    pretty = pretty . unpack . unMdlName
+    pretty (MdlName mdl) = pretty (unpack mdl)
 
 instance Semigroup ModuleName where
     MdlName mdl1 <> MdlName mdl2 = MdlName $ mdl1 <> fromString "::" <> mdl2

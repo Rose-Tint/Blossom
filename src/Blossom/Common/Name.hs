@@ -1,8 +1,3 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
-
--- {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-
 module Blossom.Common.Name (
     module Blossom.Common.Name.Ident,
     module Blossom.Common.Name.Module,
@@ -18,7 +13,7 @@ import Blossom.Common.Name.Ident
 import Blossom.Common.Name.Module
 import Blossom.Common.Source (SourceLoc, HasLoc(getLoc))
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as BS (concat, length)
+import qualified Data.ByteString as BS (concat)
 import Data.ByteString.Char8 (unpack, pack)
 import Prettyprinter (Pretty(pretty), (<+>), hardline, nest, parens)
 
@@ -66,7 +61,7 @@ instance HasLoc Name where
 -- given module name.
 external :: ModuleName -> Ident -> Name
 external mdl ident
-    | BS.length (unMdlName qual) > 0 && qual /= mdl = error $ show $
+    | not (mdlIsEmpty qual) && qual /= mdl = error $ show $
         pretty "Qualifier does not match expected module name." <>
         nest 4 (hardline
             <> pretty "Expected:" <+> pretty mdl <> hardline
@@ -81,7 +76,7 @@ external mdl ident
 -- create an external one, with the qualifier as the module name.
 internal :: Ident -> Name
 internal ident
-    | BS.length (unMdlName qual) == 0 = Name Internal iden loc
+    | mdlIsEmpty qual = Name Internal iden loc
     | otherwise = Name (External qual) iden loc
     where
         (qual, Ident iden loc) = fromQualified ident
