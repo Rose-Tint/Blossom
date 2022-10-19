@@ -2,31 +2,43 @@ module Main (
     main,
 ) where
 
+import Blossom.Monad (
+    Blossom,
+    liftIO,
+    runBlossom,
+    getCmd,
+    message,
+    printError,
+    )
 import Blossom.Cmd (CmdLine(..), parseCmdLine)
 import Blossom.Common.Name.Module (fromFilePath)
-import Blossom.LLTree.Module (ModuleLLT)
 import Blossom.Parsing.Parser (parseFile)
-import Blossom.Resolver.Monad (ResolverT, runResolverT)
+import Blossom.Resolver.Monad (runResolverT)
 import Blossom.Resolver.Resolver (resolveAST)
 import Prettyprinter (pretty)
-import Prettyprinter.Util (putDocW)
 
 
 main :: IO ()
 main = do
+    putStrLn "Starting!"
     cmd <- parseCmdLine
-    let sourceFiles = cmdSourceFiles cmd
+    runBlossom cmd main'
+    putStrLn "Finishing!"
+
+main' :: Blossom ()
+main' = do
+    sourceFiles <- getCmd cmdSourceFiles
     mapM_ (\path -> do
         let mdl = fromFilePath path
-        eAst <- parseFile path mdl
+        eAst <- liftIO $ parseFile path mdl
         case eAst of
-            Left errMsg -> putStrLn errMsg
+            Left errMsg -> printError (pretty errMsg)
             Right !ast -> do
-                -- putDocW 65 (pretty ast)
-                let resolver = resolveAST ast :: ResolverT IO ModuleLLT
-                eLlt <- runResolverT mdl path resolver
+                eLlt <- runResolverT mdl path (resolveAST ast)
                 case eLlt of
-                  Left err -> putDocW 65 (pretty err)
+                  Left err -> printError (pretty err)
                   Right _llt -> return ()
                 return ()
         ) sourceFiles
+    message (pretty "Done! :3")
+    return ()

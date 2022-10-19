@@ -49,6 +49,7 @@ library
         Blossom.LLTree.Info,
         Blossom.LLTree.Module,
         Blossom.LLTree.Type,
+        Blossom.Monad,
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
