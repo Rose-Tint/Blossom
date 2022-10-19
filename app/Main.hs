@@ -15,15 +15,14 @@ import Blossom.Common.Name.Module (fromFilePath)
 import Blossom.Parsing.Parser (parseFile)
 import Blossom.Resolver.Monad (runResolverT)
 import Blossom.Resolver.Resolver (resolveAST)
-import Prettyprinter (pretty)
+import Prettyprinter (pretty, line)
 
 
 main :: IO ()
 main = do
-    putStrLn "Starting!"
     cmd <- parseCmdLine
     runBlossom cmd main'
-    putStrLn "Finishing!"
+    return ()
 
 main' :: Blossom ()
 main' = do
@@ -40,5 +39,5 @@ main' = do
                   Right _llt -> return ()
                 return ()
         ) sourceFiles
-    message (pretty "Done! :3")
+    message (pretty "Done!" <> line)
     return ()
