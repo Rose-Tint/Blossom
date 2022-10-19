@@ -48,7 +48,6 @@ data SourceLoc
     }
     -- | If a source location does not exist, a reason must be given.
     | UnknownLoc String
-    deriving (Show)
 
 -- | Represents a position *within* a module. Does not contain module or file
 -- information because it is not meant to be used outside of `@SourceLoc@`.
@@ -58,7 +57,7 @@ data Position
         posColumn :: Column,
         posOffset :: Offset
     }
-    deriving (Show, Eq)
+    deriving (Eq)
 
 instance Ord Position where
     compare = comparing posOffset
@@ -136,6 +135,12 @@ testLoc = UnknownLoc testLocRsn
 testLocRsn :: String
 testLocRsn = "TEST"
 
+instance Show SourceLoc where
+    show (SourceLoc path mdl begin end) = "SourceLoc " ++
+        show path ++ " (" ++ show mdl ++ ") (" ++
+        show begin ++ ") (" ++ show end ++ ")"
+    show (UnknownLoc rsn) = "UnknownLoc " ++ show rsn
+
 instance Eq SourceLoc where
     SourceLoc p1 m1 b1 e1 == SourceLoc p2 m2 b2 e2 =
         p1 == p2 && m1 == m2 && b1 == b2 && e1 == e2
@@ -156,6 +161,10 @@ instance Eq SourceLoc where
 instance Pretty SourceLoc where
     pretty (UnknownLoc rsn) = "?(" <> pretty rsn <> ")"
     pretty (SourceLoc path _mdl begin _end) = pretty path <> ":" <> pretty begin
+
+instance Show Position where
+    show (Pos ln col off) = "Pos " ++
+        show ln ++ " " ++ show col ++ " " ++ show off
 
 instance Pretty Position where
     pretty (Pos ln col _off) = pretty ln <> ":" <> pretty col
