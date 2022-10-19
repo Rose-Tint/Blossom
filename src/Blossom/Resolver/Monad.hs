@@ -20,7 +20,7 @@ module Blossom.Resolver.Monad (
 import Blossom.Common.Name (Ident(..), ModuleName, Name, internal, external)
 import Blossom.LLTree.Definition (Definition)
 import Blossom.Resolver.Errors (ResolverError(..))
-import qualified Blossom.Parsing.AbsSynTree as AST (Params, Type)
+import Blossom.Parsing.AbsSynTree (AbsParams, AbsType)
 import Control.Monad.Except (ExceptT, runExceptT, MonadError(throwError))
 import Control.Monad.Identity (Identity)
 import Control.Monad.State (StateT, gets, evalStateT, modify)
@@ -93,6 +93,6 @@ throwDeclNoDef = throwError . DeclNoDef
 throwMultipleDefs :: Monad m => Name -> ResolverT m a
 throwMultipleDefs = throwError . MultipleDefs
 
-throwTooManyParams :: Monad m => AST.Params -> AST.Type -> ResolverT m a
+throwTooManyParams :: Monad m => AbsParams -> AbsType -> ResolverT m a
 throwTooManyParams [] _ = throwError $ InternalError "empty parameter list"
 throwTooManyParams ps typ = throwError $ TooManyParams ps typ

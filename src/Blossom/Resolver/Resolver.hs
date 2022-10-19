@@ -12,7 +12,7 @@ import qualified Blossom.LLTree.Definition as LLT
 -- import qualified Blossom.LLTree.Info as LLT
 import qualified Blossom.LLTree.Module as LLT
 import qualified Blossom.LLTree.Type as LLT
-import qualified Blossom.Parsing.AbsSynTree as AST
+import Blossom.Parsing.AbsSynTree
 import Blossom.Resolver.Monad (
     ResolverT,
     moduleName,
@@ -28,8 +28,8 @@ import Data.ByteString.Char8 (unpack)
 import Blossom.Common.Source (HasLoc(getLoc))
 
 
-resolveAST :: Monad m => AST.ModuleAST -> ResolverT m LLT.ModuleLLT
-resolveAST (AST.ModuleAST imports defs) = do
+resolveAST :: Monad m => AbsSynTree -> ResolverT m LLT.ModuleLLT
+resolveAST (SynTree imports defs) = do
     mdl <- moduleName
     path <- modulePath
     imports' <- mapM resolveImport imports
@@ -38,8 +38,8 @@ resolveAST (AST.ModuleAST imports defs) = do
     let llt = LLT.ModuleLLT mdl path imports' defs'
     return llt
 
-resolveImport :: Monad m => AST.Import -> ResolverT m LLT.Import
-resolveImport (AST.Import name) = do
+resolveImport :: Monad m => AbsImport -> ResolverT m LLT.Import
+resolveImport (Import name) = do
     name' <- resolveIdent name
     let path = map (\ch ->
             if ch == '_' then '/' else ch
@@ -50,8 +50,8 @@ resolveImport (AST.Import name) = do
 -- | Combines multiple function defintions into one, provided that they are
 -- 'compatible'. Two function definitions are 'compatible' if they cannot
 -- match against the same inputs.
-resolveTopExprs :: Monad m => [AST.TopLevelExpr] -> ResolverT m ()
-resolveTopExprs (AST.FuncDecl iden typ : exprs) = do
+resolveTopExprs :: Monad m => [AbsTopLevelExpr] -> ResolverT m ()
+resolveTopExprs (FuncDecl iden typ : exprs) = do
     name <- resolveIdent iden
     let (defs, remExprs) = takeFuncDefs iden exprs
     (params, body) <- mergeDefs defs
@@ -81,7 +81,7 @@ resolveTopExprs _ = return ()
 
 -- | Merges parameters and a type into parameters with their respective types,
 -- and the return type
-applyParams :: Monad m => AST.Params -> AST.Type
+applyParams :: Monad m => AbsParams -> AbsType
     -> ResolverT m ([LLT.Param], LLT.Type)
 applyParams params typ = do
     mResult <- go params typ
@@ -89,36 +89,39 @@ applyParams params typ = do
         Nothing -> throwTooManyParams params typ
         Just result -> return result
     where
-        go :: Monad m => AST.Params -> AST.Type
+        go :: Monad m => AbsParams -> AbsType
             -> ResolverT m (Maybe ([LLT.Param], LLT.Type))
         go [] typ' = do
-            let typ'' = LLT.fromASTType typ'
+            typ'' <- resolveType typ'
             return (Just ([], typ''))
-        go (p:ps) (t1 AST.:-> t2) = do
+        go (p:ps) (t1 :-> t2) = do
             name <- resolvePattern p
-            let typ' = LLT.fromASTType t1
+            typ' <- resolveType t1
             let p' = LLT.Param name typ'
             result <- go ps t2
             case result of
                 Nothing -> return Nothing
                 Just (ps', rtn) -> return (Just (p':ps', rtn))
-        go (:){} AST.TypeCon{} = return Nothing
+        go (:){} _ = return Nothing
 
-takeFuncDefs :: Ident -> [AST.TopLevelExpr]
-    -> ([(AST.Params, AST.Expr)], [AST.TopLevelExpr])
-takeFuncDefs declName allExprs@(AST.FuncDef defName params body : exprs)
+takeFuncDefs :: Ident -> [AbsTopLevelExpr]
+    -> ([(AbsParams, AbsExpr)], [AbsTopLevelExpr])
+takeFuncDefs declName allExprs@(FuncDef defName params body : exprs)
     | declName == defName =
         let (defs, remExprs) = takeFuncDefs declName exprs
         in ((params, body):defs, remExprs)
     | otherwise = ([], allExprs)
 takeFuncDefs _ exprs = ([], exprs)
 
--- TODO!!!
-resolvePattern :: Monad m => AST.Pattern -> ResolverT m Name
-resolvePattern (AST.Param name) = resolveIdent name
-resolvePattern ptrn@AST.CtorPtrn{} = throwTODO (getLoc ptrn) "Patterns"
+resolveType :: Monad m => AbsType -> ResolverT m LLT.Type
+resolveType _ = return undefined
 
-resolveExpr :: Monad m => AST.Expr -> ResolverT m LLT.Body
+-- TODO!!!
+resolvePattern :: Monad m => AbsPattern -> ResolverT m Name
+resolvePattern (Param name) = resolveIdent name
+resolvePattern ptrn@CtorPtrn{} = throwTODO (getLoc ptrn) "Patterns"
+
+resolveExpr :: Monad m => AbsExpr -> ResolverT m LLT.Body
 resolveExpr _ = throwTODO undefined "Expressions"
 
 resolveIdent :: Monad m => Ident -> ResolverT m Name

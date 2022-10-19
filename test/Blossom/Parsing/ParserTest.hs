@@ -7,17 +7,18 @@ module Blossom.Parsing.ParserTest (
 
 import Test.HUnit (Test(..), (@=?))
 import Blossom.Common.Literal (Literal(StringLit))
-import Blossom.Common.Name (Ident, testIdent)
-import Blossom.Parsing.AbsSynTree (
-    ModuleAST(..),
+import Blossom.Common.Name.Ident (Ident, testIdent)
+import Blossom.Parsing.AbsSynTree (AbsSynTree)
+import Blossom.Parsing.Parser (parse)
+import Blossom.Parsing.SynTree (
+    SynTree(..),
     Import(..),
     TopLevelExpr(..),
     Pattern(..),
     Expr(..),
     Constructor(..),
-    Type(..),
     )
-import Blossom.Parsing.Parser (parse)
+import Blossom.Typing.Type (Type(..))
 import Data.String (IsString(fromString))
 
 
@@ -26,7 +27,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
     TestCase $
         let actual = parse
                 "import Text::Pretty;\n\
-                \data ExceptI32 {\n\
+                \data Except {\n\
                 \    Failure : String;\n\
                 \    Success : I32;\n\
                 \}\n\
@@ -36,17 +37,17 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                 \func fail msg (Success i)\n\
                 \    = Failure (msg ++ \"\\nLast value: \" ++ pretty i);\n"
                 "" ""
-            expected = Right $ ModuleAST {
+            expected = Right (SynTree {
                 moduleImports = [Import "Text::Pretty"],
                 moduleTopExprs = reverse [
                     DataDef "ExceptI32" (reverse [
-                        Constructor "Failure" (TypeCon "String" []),
-                        Constructor "Success" (TypeCon "I32" [])
+                        Constructor "Failure" (TypeCon "String"),
+                        Constructor "Success" (TypeCon "I32")
                         ]),
                     FuncDecl "fail" (
-                        TypeCon "String" []
-                        :-> TypeCon "ExceptI32" []
-                        :-> TypeCon "ExceptI32" []
+                        TypeCon "String"
+                        :-> TypeCon "ExceptI32"
+                        :-> TypeCon "ExceptI32"
                         ),
                     FuncDef "fail"
                         -- params
@@ -80,7 +81,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                             ]
                         )
                     ]
-                }
+                } :: AbsSynTree)
         in expected @=? actual
     ]
 

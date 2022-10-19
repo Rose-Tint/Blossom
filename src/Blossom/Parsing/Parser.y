@@ -9,17 +9,7 @@ module Blossom.Parsing.Parser (
 
 import Blossom.Common.Literal (Literal(..))
 import Blossom.Common.Name (ModuleName, Ident)
-import Blossom.Parsing.AbsSynTree (
-    Case(..),
-    Constructor(..),
-    Expr(..),
-    Import(..),
-    ModuleAST(..),
-    Params,
-    Pattern(..),
-    TopLevelExpr(..),
-    Type(..),
-    )
+import Blossom.Parsing.AbsSynTree
 import Blossom.Parsing.Lexer (
     Alex,
     lexError,
@@ -36,7 +26,7 @@ import Prettyprinter (pretty, (<+>))
 %error { parseError }
 %lexer { lexer } { TokEnd }
 %monad { Alex }
-%expect 4
+-- %expect 4
 
 %tokentype { Token }
 %token
@@ -76,24 +66,24 @@ import Prettyprinter (pretty, (<+>))
 %%
 
 
-Module :: { ModuleAST }
-    : ImportList TopLevel { ModuleAST $1 $2 }
+Module :: { AbsSynTree }
+    : ImportList TopLevel { SynTree $1 $2 }
 
-ImportList :: { [Import] }
-    : ImportList Import { ($2:$1) }
+ImportList :: { [AbsImport] }
+    : ImportList Import { $2 : $1 }
     | {- EMPTY -} { [] }
 
-Import :: { Import }
+Import :: { AbsImport }
     : import big_id ";" { Import $2 }
 
-TopLevel :: { [TopLevelExpr] }
-    : TopLevel TopLevelExpr { ($2:$1) }
+TopLevel :: { [AbsTopLevelExpr] }
+    : TopLevel TopLevelExpr { $2 : $1 }
     | {- EMPTY -} { [] }
 
-TopLevelExpr :: { TopLevelExpr }
+TopLevelExpr :: { AbsTopLevelExpr }
     : FuncDecl { $1}
     | FuncDef { $1 }
-    | DataDefinition { $1 }
+    | DataDef { $1 }
 
 -- | The part that prefixes both function
 -- declarations *and* definitions
@@ -102,49 +92,49 @@ FuncOpener :: { Ident }
     : func small_id { $2 }
     | func "(" operator ")" { $3 }
 
-FuncDecl :: { TopLevelExpr }
+FuncDecl :: { AbsTopLevelExpr }
     : FuncOpener SigWithSemi { FuncDecl $1 $2 }
 
-FuncDef :: { TopLevelExpr }
+FuncDef :: { AbsTopLevelExpr }
     : FuncOpener Params StmtAssignment { FuncDef $1 $2 $3 }
 
-Signature :: { Type }
+Signature :: { AbsType }
     : ":" Type { $2 }
 
 -- | A type-signature that ends with a semicolon
-SigWithSemi :: { Type }
+SigWithSemi :: { AbsType }
     : Signature ";" { $1 }
 
-Params :: { Params }
+Params :: { AbsParams }
     : Params_ { reverse $1}
 
-Params_ :: { Params }
-    : Params_ Pattern { ($2:$1) }
+Params_ :: { AbsParams }
+    : Params_ Pattern { $2 : $1 }
     | Pattern { [$1] }
 
-Pattern :: { Pattern }
+Pattern :: { AbsPattern }
     : small_id { Param $1 }
     | big_id { CtorPtrn $1 [] }
     | "(" big_id Params ")" { CtorPtrn $2 $3 }
     | "(" Pattern ")" { $2 }
 
-Stmt :: { Expr }
+Stmt :: { AbsExpr }
     : Expr ";" { $1 }
 
-StmtAssignment :: { Expr }
+StmtAssignment :: { AbsExpr }
     : "=" Stmt { $2 }
 
-Implication :: { Expr }
+Implication :: { AbsExpr }
     : "=>" Expr { $2 }
 
-Expr :: { Expr }
+Expr :: { AbsExpr }
     : Term { $1 }
     | Term Signature { TypedExpr $1 $2 }
     | "\\" Params Implication { Lambda $2 $3 }
     | match Term "{" MatchCases "}" { Match $2 $4 }
     | FuncApp { FuncApp $1 }
 
-Term :: { Expr }
+Term :: { AbsExpr }
     : small_id { VarExpr $1 }
     | big_id { VarExpr $1 }
     | integer { LitExpr (IntLit $1) }
@@ -155,42 +145,44 @@ Term :: { Expr }
     -- | "(" operator ")" { VarExpr $2 }
     | "(" Expr ")" { $2 }
 
-FuncApp :: { [Expr] }
+FuncApp :: { [AbsExpr] }
     : FuncApp_ { reverse $1 }
 
-FuncApp_ :: { [Expr] }
-    : FuncApp_ Term { ($2:$1) }
+FuncApp_ :: { [AbsExpr] }
+    : FuncApp_ Term { $2 : $1 }
     -- | FuncApp_ operator { (VarExpr $2:$1) }
     | Term Term { [$2, $1] } -- backwards bc it gets reversed
 
-MatchCases :: { [Case] }
-    : MatchCases MatchCase { ($2:$1) }
+MatchCases :: { [AbsCase] }
+    : MatchCases MatchCase { $2 : $1 }
     | MatchCase { [$1] }
 
-MatchCase :: { Case }
+MatchCase :: { AbsCase }
     : Pattern Implication ";" { Case $1 $2 }
 
-Type :: { Type }
-    : big_id Types0 { TypeCon $1 $2 }
+Type :: { AbsType }
+    : big_id { TypeCon $1 }
+    | small_id { TypeVar $1 }
+    | Type Type { TypeApp $1 $2 }
     | Type "->" Type { $1 :-> $3 }
     | "(" Type ")" { $2 }
 
-Types0 :: { [Type] }
-    : Types0_ { reverse $1 }
+DataDef :: { AbsTopLevelExpr }
+    : data big_id SmallIds0 "{" Constructors "}" { DataDef $2 $3 $5 }
 
-Types0_ :: { [Type] }
-    : Types0_ Type { ($2:$1) }
+SmallIds0 :: { [Ident] }
+    : SmallIds0_ { reverse $1 }
+
+SmallIds0_ :: { [Ident] }
+    : SmallIds0_ small_id { $2 : $1 }
     | {- EMPTY -} { [] }
-
-DataDefinition :: { TopLevelExpr }
-    : data big_id "{" Constructors "}" { DataDef $2 $4 }
 
 -- Order does not matter, so there is no need to use `@reverse@`
-Constructors :: { [Constructor] }
-    : Constructors Constructor { ($2:$1) }
+Constructors :: { [AbsConstructor] }
+    : Constructors Constructor { $2 : $1 }
     | {- EMPTY -} { [] }
 
-Constructor :: { Constructor }
+Constructor :: { AbsConstructor }
     : big_id SigWithSemi { Constructor $1 $2 }
     | big_id ";" { Nullary $1 }
 
@@ -199,10 +191,10 @@ Constructor :: { Constructor }
 parseError :: Token -> Alex a
 parseError tok = lexError $ pretty "Unexpected token:" <+> pretty tok
 
-parse :: ByteString -> ModuleName -> FilePath -> Either String ModuleAST
+parse :: ByteString -> ModuleName -> FilePath -> Either String AbsSynTree
 parse src mdl path = runLexer src mdl path blossomParser
 
-parseFile :: FilePath -> ModuleName -> IO (Either String ModuleAST)
+parseFile :: FilePath -> ModuleName -> IO (Either String AbsSynTree)
 parseFile path mdl = do
     contents <- BS.readFile path
     -- the strictness of `contents` is important here!

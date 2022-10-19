@@ -53,6 +53,7 @@ library
         Blossom.Parsing.AbsSynTree,
         Blossom.Parsing.Lexer,
         Blossom.Parsing.Parser,
+        Blossom.Parsing.SynTree,
         Blossom.Parsing.Token,
         Blossom.Resolver.Errors,
         Blossom.Resolver.Monad,

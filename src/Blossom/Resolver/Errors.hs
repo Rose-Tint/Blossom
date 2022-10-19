@@ -4,17 +4,18 @@ module Blossom.Resolver.Errors (
     ResolverError(..),
 ) where
 
-import Blossom.Common.Name (Name)
-import Blossom.Parsing.AbsSynTree (Params, Type, typeArity)
+import Blossom.Common.Name (Name, Ident)
 import Blossom.Common.Source (SourceLoc, HasLoc(getLoc), unknownLoc)
-import Prettyprinter
+import Blossom.Parsing.AbsSynTree (Params, AbsType)
+import Prettyprinter (Pretty(pretty), (<+>), line, nest, dot)
+import Blossom.Common.Arity (HasArity(arityOf))
 
 
 data ResolverError
     = TODO SourceLoc String
     | DeclNoDef Name
     | MultipleDefs Name
-    | TooManyParams Params Type
+    | TooManyParams (Params Ident) AbsType
     | InternalError String
 
 instance HasLoc ResolverError where
@@ -36,7 +37,7 @@ instance Pretty ResolverError where
                     <> "This is not supported yet :("
                 TooManyParams params typ ->
                     "Too many parameters for expected type" <> line <> nest 4 (
-                    "Expected an arity of" <+> pretty (typeArity typ) <+>
+                    "Expected an arity of" <+> pretty (arityOf typ) <+>
                     ", but got" <+> pretty (length params) <+> "parameters"
                     )
                 InternalError msg -> "[INTERNAL ERROR]" <+> pretty msg
