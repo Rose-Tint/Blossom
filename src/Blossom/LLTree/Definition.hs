@@ -2,11 +2,11 @@ module Blossom.LLTree.Definition (
     Definition(..),
     Param(..),
     CtorDef(..),
-    Arity(..),
     FuncApp(..),
     PartialApp(..),
 ) where
 
+import Blossom.Common.Arity (HasArity(..), Arity)
 import Blossom.Common.Name (Name)
 import Blossom.LLTree.Body (Body, Value)
 import Blossom.LLTree.Closure (Closure)
@@ -35,9 +35,6 @@ data CtorDef = CtorDef {
     ctorInfo :: Info
     }
 
--- | The number of arguments that a function can take.
-newtype Arity = Arity Word
-
 data FuncApp = FAP {
     fapHeader :: Header,
     fapArity :: Arity,
@@ -51,3 +48,9 @@ data PartialApp = PAP {
     papClosure :: Closure,
     papArgs :: [Value] -- args that have been applied,
     }
+
+instance HasArity FuncApp where
+    arityOf FAP{fapArity=arity} = arity
+
+instance HasArity PartialApp where
+    arityOf PAP{papArity=arity} = arity
