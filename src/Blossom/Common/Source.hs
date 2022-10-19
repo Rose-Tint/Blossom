@@ -1,4 +1,3 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Blossom.Common.Source (
@@ -12,9 +11,6 @@ module Blossom.Common.Source (
     mergeSourceLocs,
     mergeSourceLocs',
     getSourceLines,
-    mkLine,
-    mkColumn,
-    mkOffset,
     zeroLoc,
     zeroPos,
     mkPos,
@@ -35,14 +31,11 @@ import Data.String (fromString)
 import Prettyprinter (Pretty(pretty))
 
 
-newtype Line = Line { unLine :: Word }
-    deriving (Show, Eq, Ord, Enum, Num, Pretty)
+type Line = Int
 
-newtype Column = Column { unColumn :: Word }
-    deriving (Show, Eq, Ord, Enum, Num, Pretty)
+type Column = Int
 
-newtype Offset = Offset { unOffset :: Word }
-    deriving (Show, Eq, Ord, Enum, Num)
+type Offset = Int
 
 -- | A span from one positon to the next, along with the path to and name of
 -- the containing module.
@@ -126,15 +119,6 @@ getSourceLines bs (SourceLoc _path _mdl begin end) =
 mkPos :: (Integral l, Integral c, Integral o) => l -> c -> o -> Position
 mkPos l c o = Pos (fromIntegral l) (fromIntegral c) (fromIntegral o)
 
-mkLine :: Integral n => n -> Line
-mkLine = Line . fromIntegral
-
-mkColumn :: Integral n => n -> Column
-mkColumn = Column . fromIntegral
-
-mkOffset :: Integral n => n -> Offset
-mkOffset = Offset . fromIntegral
-
 zeroPos :: Position
 zeroPos = Pos 0 0 0
 
@@ -153,8 +137,8 @@ testLocRsn :: String
 testLocRsn = "TEST"
 
 instance Eq SourceLoc where
-    SourceLoc m1 p1 b1 e1 == SourceLoc m2 p2 b2 e2 =
-        m1 == m2 && p1 == p2 && b1 == b2 && e1 == e2
+    SourceLoc p1 m1 b1 e1 == SourceLoc p2 m2 b2 e2 =
+        p1 == p2 && m1 == m2 && b1 == b2 && e1 == e2
     -- two unknown locations should only ever compare equal if at least one of
     -- them is for testing.
     -- guards are used for readability

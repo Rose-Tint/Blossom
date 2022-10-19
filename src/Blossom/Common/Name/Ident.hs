@@ -13,29 +13,24 @@ import Data.ByteString.Char8 as BS (
     dropWhileEnd,
     spanEnd,
     )
-import Data.Ord (comparing)
 import Data.String (fromString)
 import Prettyprinter (Pretty(pretty))
 
 -- | The name as it appears in the source code, along with it's location
-data Ident
-    = Ident {
-        identBS :: ByteString,
-        identLoc :: SourceLoc
-    }
+data Ident = Ident ByteString SourceLoc
     deriving (Show)
 
 instance Eq Ident where
-    Ident id1 _loc1 == Ident id2 _loc2 = id1 == id2
+    Ident iden1 _loc1 == Ident iden2 _loc2 = iden1 == iden2
 
 instance Ord Ident where
-    compare = comparing identBS
+    compare (Ident iden1 _loc1) (Ident iden2 _loc2) = compare iden1 iden2
 
 instance Pretty Ident where
     pretty (Ident iden _loc) = pretty (unpack iden)
 
 instance HasLoc Ident where
-    getLoc = identLoc
+    getLoc (Ident _iden loc) = loc
 
 -- | Separates the qualifier from the actual identifier.
 fromQualified :: Ident -> (ModuleName, Ident)
