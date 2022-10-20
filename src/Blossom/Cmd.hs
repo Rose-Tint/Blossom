@@ -4,24 +4,8 @@ module Blossom.Cmd (
     parseCmdLine,
 ) where
 
-import Options.Applicative (
-    strArgument,
-    short,
-    metavar,
-    long,
-    info,
-    helper,
-    help,
-    fullDesc,
-    execParser,
-    Alternative(many),
-    Parser,
-    ParserInfo,
-    maybeReader,
-    option,
-    ReadM, value,
-    )
-import Data.Char (toLower, digitToInt, isDigit)
+import Options.Applicative
+import Data.Char (digitToInt, isDigit)
 
 
 data Verbosity
@@ -41,34 +25,39 @@ parseCmdLine :: IO CmdLine
 parseCmdLine = execParser cmdLineParserInfo
 
 cmdLineParserInfo :: ParserInfo CmdLine
-cmdLineParserInfo = info
-    (helper <*> cmdLineParser)
-    fullDesc
+cmdLineParserInfo = info (helper <*> cmdLineParser) fullDesc
 
 cmdLineParser :: Parser CmdLine
 cmdLineParser = CmdLine
     <$> many (strArgument (
             metavar "files"
         ))
-    <*> option verbosityReader (
-            short 'v'
-            <> long "verbose"
-            <> help "Enable more detailed output"
-            <> value Normal
+    <*> (
+            flag' Silent (
+                short 's'
+                <> long "silent"
+                <> help "Disable ALL output"
+            )
+        <|>
+            flag Normal Verbose (
+                short 'v'
+                <> long "verbose"
+                <> help "Enable more detailed output"
+            )
+        <|>
+            option verbosityReader (
+                short 'v'
+                <> long "verbosity"
+                <> value Normal
+                <> help "Set the level of output detail"
+            )
         )
 
 verbosityReader :: ReadM Verbosity
-verbosityReader = maybeReader go
+verbosityReader = maybeReader ((toEnum <$>) . readNum)
     where
         readNum [] = Nothing
         readNum (ch : chs)
             | not (isDigit ch) = Nothing
             | null chs = Just (digitToInt ch)
             | otherwise = (digitToInt ch +) . (* 10) <$> readNum chs
-        go str = case map toLower str of
-            "silent" -> Just Silent
-            "errors" -> Just ErrorsOnly
-            "normal" -> Just Normal
-            "verbose" -> Just Verbose
-            _ -> toEnum <$> readNum str
-
