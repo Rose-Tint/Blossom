@@ -3,8 +3,10 @@
 {-# OPTIONS_GHC -fprof-auto-exported #-}
 
 module Blossom.Parsing.Parser (
-    parseFile,
-    parse,
+    parseModuleFile,
+    parseModule,
+    parseType,
+    parseExpr,
 ) where
 
 import Blossom.Common.Literal (Literal(..))
@@ -22,11 +24,13 @@ import Prettyprinter (pretty, (<+>))
 }
 
 
-%name blossomParser Module
+%name moduleParser Module
+%name typeParser Type
+%name exprParser Expr
 %error { parseError }
 %lexer { lexer } { TokEnd }
 %monad { Alex }
--- %expect 4
+%expect 0
 
 %tokentype { Token }
 %token
@@ -52,15 +56,11 @@ import Prettyprinter (pretty, (<+>))
     data                    { TokData }
     match                   { TokMatch }
 
--- PLEASE NOTE: If function application is not as expected,
--- please remove the following precedence declaration.
--- It did turn 12 s/r conflicts into reduces for FuncApp.
--- (commented out bc it messed things up. :/)
--- %nonassoc integer float string small_id big_id char "(" -- "->"
-
--- ghost precedence for function application
+-- ghost precedence for application
 -- https://stackoverflow.com/questions/27630269
--- %nonassoc APP
+-- https://www.haskell.org/happy/doc/html/sec-Precedences.html
+%right small_id big_id "(" "->"
+%nonassoc APP
 
 
 %%
@@ -149,7 +149,6 @@ FuncApp :: { [AbsExpr] }
 
 FuncApp_ :: { [AbsExpr] }
     : FuncApp_ Term { $2 : $1 }
-    -- | FuncApp_ operator { (VarExpr $2:$1) }
     | Term Term { [$2, $1] }
 
 MatchCases :: { [AbsCase] }
@@ -162,7 +161,7 @@ MatchCase :: { AbsCase }
 Type :: { AbsType }
     : big_id { TypeCon $1 }
     | small_id { TypeVar $1 }
-    | Type Type { TypeApp $1 $2 }
+    | Type Type %prec APP { TypeApp $1 $2 }
     | Type "->" Type { $1 :-> $3 }
     | "(" Type ")" { $2 }
 
@@ -190,13 +189,19 @@ Constructor :: { AbsConstructor }
 parseError :: Token -> Alex a
 parseError tok = lexError $ pretty "Unexpected token:" <+> pretty tok
 
-parse :: ByteString -> ModuleName -> FilePath -> Either String AbsSynTree
-parse src mdl path = runLexer src mdl path blossomParser
+parseType :: ByteString -> ModuleName -> FilePath -> Either String AbsType
+parseType src mdl path = runLexer src mdl path typeParser
 
-parseFile :: FilePath -> ModuleName -> IO (Either String AbsSynTree)
-parseFile path mdl = do
+parseExpr :: ByteString -> ModuleName -> FilePath -> Either String AbsExpr
+parseExpr src mdl path = runLexer src mdl path exprParser
+
+parseModule :: ByteString -> ModuleName -> FilePath -> Either String AbsSynTree
+parseModule src mdl path = runLexer src mdl path moduleParser
+
+parseModuleFile :: FilePath -> ModuleName -> IO (Either String AbsSynTree)
+parseModuleFile path mdl = do
     contents <- BS.readFile path
     -- the strictness of `contents` is important here!
-    let result = parse (contents `seq` contents) mdl path
+    let result = parseModule (contents `seq` contents) mdl path
     return result
 }

@@ -8,46 +8,58 @@ module Blossom.Parsing.ParserTest (
 import Test.HUnit (Test(..), (@=?))
 import Blossom.Common.Literal (Literal(StringLit))
 import Blossom.Common.Name.Ident (Ident, testIdent)
-import Blossom.Parsing.AbsSynTree (AbsSynTree)
-import Blossom.Parsing.Parser (parse)
-import Blossom.Parsing.SynTree (
-    SynTree(..),
-    Import(..),
-    TopLevelExpr(..),
-    Pattern(..),
-    Expr(..),
-    Constructor(..),
-    )
+import Blossom.Parsing.Parser (parseModule, parseType)
+import Blossom.Parsing.SynTree
 import Blossom.Typing.Type (Type(..))
 import Data.String (IsString(fromString))
 
 
 tests :: Test
 tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
-    TestCase $
-        let actual = parse
+    TestLabel "types" $ TestList [
+        TestCase $
+            let actual = parseType "String -> List a" "" ""
+                expected = Right $
+                    TypeCon "String" :-> TypeApp (TypeCon "List") (TypeVar "a")
+            in expected @=? actual,
+        TestCase $
+            let actual = parseType "(a -> b -> b) -> List a -> b -> b" "" ""
+                expected = Right $
+                    (TypeVar "a" :-> TypeVar "b" :-> TypeVar "b")
+                    :-> TypeApp (TypeCon "List") (TypeVar "a")
+                    :-> TypeVar "b"
+                    :-> TypeVar "b"
+            in expected @=? actual,
+        TestCase $
+            let actual = parseType "Map k v" "" ""
+                expected = Right $
+                    TypeApp (TypeApp (TypeCon "Map") (TypeVar "k")) (TypeVar "v")
+            in expected @=? actual
+        ],
+    TestLabel "module" $ TestCase $
+        let actual = parseModule
                 "import Text::Pretty;\n\
-                \data Except {\n\
+                \data Except a {\n\
                 \    Failure : String;\n\
-                \    Success : I32;\n\
+                \    Success : a;\n\
                 \}\n\
-                \func fail : String -> ExceptI32 -> ExceptI32;\n\
+                \func fail : String -> Except a -> Except a;\n\
                 \func fail newMsg (Failure oldMsg)\n\
                 \    = Failure (oldMsg ++ \"\\n~~and\\n\" ++ newMsg);\n\
-                \func fail msg (Success i)\n\
-                \    = Failure (msg ++ \"\\nLast value: \" ++ pretty i);\n"
+                \func fail msg (Success a)\n\
+                \    = Failure (msg ++ \"\\nLast value: \" ++ pretty a);\n"
                 "" ""
-            expected = Right (SynTree {
+            expected = Right $ SynTree {
                 moduleImports = [Import "Text::Pretty"],
                 moduleTopExprs = reverse [
-                    DataDef "ExceptI32" (reverse [
+                    DataDef "Except" ["a"] (reverse [
                         Constructor "Failure" (TypeCon "String"),
-                        Constructor "Success" (TypeCon "I32")
+                        Constructor "Success" (TypeVar "a")
                         ]),
                     FuncDecl "fail" (
                         TypeCon "String"
-                        :-> TypeCon "ExceptI32"
-                        :-> TypeCon "ExceptI32"
+                        :-> TypeApp (TypeCon "Except") (TypeVar "a")
+                        :-> TypeApp (TypeCon "Except") (TypeVar "a")
                         ),
                     FuncDef "fail"
                         -- params
@@ -66,7 +78,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                         ),
                     FuncDef "fail"
                         -- params
-                        [Param "msg", CtorPtrn "Success" [Param "i"]]
+                        [Param "msg", CtorPtrn "Success" [Param "a"]]
                         -- body
                         (FuncApp [
                             VarExpr "Failure",
@@ -76,12 +88,12 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                                 LitExpr (StringLit "\\nLast value: "),
                                 VarExpr "++",
                                 VarExpr "pretty",
-                                VarExpr "i"
+                                VarExpr "a"
                                 ]
                             ]
                         )
                     ]
-                } :: AbsSynTree)
+                }
         in expected @=? actual
     ]
 
