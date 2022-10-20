@@ -117,6 +117,7 @@ test-suite blossom-test
     type:
         exitcode-stdio-1.0
     other-modules:
+        Blossom.CmdTest,
         Blossom.Common.NameTest,
         Blossom.Common.Name.ModuleTest,
         Blossom.Parsing.LexerTest,

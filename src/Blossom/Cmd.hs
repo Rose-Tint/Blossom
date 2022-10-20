@@ -19,6 +19,7 @@ data CmdLine = CmdLine {
     cmdSourceFiles :: [FilePath],
     cmdVerbosity :: Verbosity
     }
+    deriving (Show, Eq)
 
 
 parseCmdLine :: IO CmdLine
@@ -46,8 +47,7 @@ cmdLineParser = CmdLine
             )
         <|>
             option verbosityReader (
-                short 'v'
-                <> long "verbosity"
+                long "verbosity"
                 <> value Normal
                 <> help "Set the level of output detail"
             )
