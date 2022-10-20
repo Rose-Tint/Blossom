@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main (
     main,
 ) where
@@ -7,15 +9,15 @@ import Blossom.Monad (
     liftIO,
     runBlossom,
     getCmd,
-    message,
+    message',
     printError,
     )
 import Blossom.Cmd (CmdLine(..), parseCmdLine)
 import Blossom.Common.Name.Module (fromFilePath)
-import Blossom.Parsing.Parser (parseFile)
+import Blossom.Parsing.Parser (parseModuleFile)
 import Blossom.Resolver.Monad (runResolverT)
 import Blossom.Resolver.Resolver (resolveAST)
-import Prettyprinter (pretty, line)
+import Prettyprinter (pretty, (<+>), brackets)
 
 
 main :: IO ()
@@ -27,9 +29,12 @@ main = do
 main' :: Blossom ()
 main' = do
     sourceFiles <- getCmd cmdSourceFiles
-    mapM_ (\path -> do
+    let fileCount = length sourceFiles
+    mapM_ (\(n, path) -> do
         let mdl = fromFilePath path
-        eAst <- liftIO $ parseFile path mdl
+        message' $ brackets (pretty n <+> "of" <+> pretty fileCount)
+            <+> "Compiling" <+> pretty mdl
+        eAst <- liftIO $ parseModuleFile path mdl
         case eAst of
             Left errMsg -> printError (pretty errMsg)
             Right !ast -> do
@@ -38,6 +43,4 @@ main' = do
                   Left err -> printError (pretty err)
                   Right _llt -> return ()
                 return ()
-        ) sourceFiles
-    message (pretty "Done!" <> line)
-    return ()
+        ) (zip [1..fileCount] sourceFiles)
