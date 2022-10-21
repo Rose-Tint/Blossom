@@ -1,4 +1,5 @@
 {
+{-# LINE 2 "src/Blossom/Parsing/Parser.y" #-}
 {-# OPTIONS_GHC -fno-prof-auto #-}
 {-# OPTIONS_GHC -fprof-auto-exported #-}
 
@@ -12,12 +13,7 @@ module Blossom.Parsing.Parser (
 import Blossom.Common.Literal (Literal(..))
 import Blossom.Common.Name (ModuleName, Ident)
 import Blossom.Parsing.AbsSynTree
-import Blossom.Parsing.Lexer (
-    Alex,
-    lexError,
-    lexer,
-    runLexer,
-    )
+import Blossom.Parsing.Lexer (Alex, lexError, lexer, runLexer)
 import Blossom.Parsing.Token (Token(..))
 import Data.ByteString.Lazy as BS (ByteString, toStrict, readFile)
 import Prettyprinter (pretty, (<+>))
@@ -186,6 +182,8 @@ Constructor :: { AbsConstructor }
 
 
 {
+{-# LINE 186 "src/Blossom/Parsing/Parser.y" #-}
+
 parseError :: Token -> Alex a
 parseError tok = lexError $ pretty "Unexpected token:" <+> pretty tok
 
