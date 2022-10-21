@@ -3,8 +3,9 @@ module Blossom.Config.CmdLine (
     parseCmdLine,
 ) where
 
-import Blossom.Config.Verbosity
+import Blossom.Config.Verbosity (Verbosity(..))
 import Options.Applicative
+
 
 -- | Represents options provided by command-line arguments.
 --
