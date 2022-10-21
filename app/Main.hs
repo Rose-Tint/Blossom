@@ -15,8 +15,6 @@ import Blossom.Monad (
 import Blossom.Cmd (CmdLine(..), parseCmdLine)
 import Blossom.Common.Name.Module (fromFilePath)
 import Blossom.Parsing.Parser (parseModuleFile)
-import Blossom.Resolver.Monad (runResolverT)
-import Blossom.Resolver.Resolver (resolveAST)
 import Prettyprinter (pretty, (<+>), brackets)
 
 
@@ -37,10 +35,5 @@ main' = do
         eAst <- liftIO $ parseModuleFile path mdl
         case eAst of
             Left errMsg -> printError (pretty errMsg)
-            Right !ast -> do
-                eLlt <- runResolverT mdl path (resolveAST ast)
-                case eLlt of
-                  Left err -> printError (pretty err)
-                  Right _llt -> return ()
-                return ()
+            Right !_ast -> return ()
         ) (zip [1..fileCount] sourceFiles)
