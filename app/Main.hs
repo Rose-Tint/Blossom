@@ -8,11 +8,11 @@ import Blossom.Monad (
     Blossom,
     liftIO,
     runBlossom,
-    getCmd,
+    getCnf,
     message',
     printError,
     )
-import Blossom.Cmd (CmdLine(..), parseCmdLine)
+import Blossom.Config (cnfSourceFiles, readConfiguration)
 import Blossom.Common.Name.Module (fromFilePath)
 import Blossom.Parsing.Parser (parseModuleFile)
 import Prettyprinter (pretty, (<+>), brackets)
@@ -20,13 +20,13 @@ import Prettyprinter (pretty, (<+>), brackets)
 
 main :: IO ()
 main = do
-    cmd <- parseCmdLine
-    runBlossom cmd main'
+    config <- readConfiguration
+    runBlossom config main'
     return ()
 
 main' :: Blossom ()
 main' = do
-    sourceFiles <- getCmd cmdSourceFiles
+    sourceFiles <- getCnf cnfSourceFiles
     let fileCount = length sourceFiles
     mapM_ (\(n, path) -> do
         let mdl = fromFilePath path
