@@ -40,6 +40,7 @@ library
         Blossom.Common.Name,
         Blossom.Common.Name.Ident,
         Blossom.Common.Name.Module,
+        Blossom.Common.OStream,
         Blossom.Common.Source,
         Blossom.Monad,
         Blossom.Parsing.AbsSynTree,
