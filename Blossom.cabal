@@ -99,10 +99,11 @@ executable blossom-prof
     hs-source-dirs:
         app
     ghc-options:
-        "-with-rtsopts=-p -sBlossom-prof.stat"
+        "-with-rtsopts=-p -poprofile -i0.1"
         -O2
         -threaded
-        -fprof-auto-top
+        -fno-prof-auto
+        -fno-prof-cafs
 
 test-suite blossom-test
     import:
