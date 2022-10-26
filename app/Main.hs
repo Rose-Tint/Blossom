@@ -9,8 +9,8 @@ import Blossom.Monad (
     liftIO,
     runBlossom,
     getCnf,
-    message',
-    printError,
+    message,
+    fatal,
     )
 import Blossom.Config (cnfSourceFiles, readConfiguration)
 import Blossom.Common.Name.Module (fromFilePath)
@@ -31,11 +31,11 @@ main' = do
     let fileCount = length sourceFiles
     mapM_ (\(n, path) -> do
         let mdl = fromFilePath path
-        message' $ brackets (pretty n <+> "of" <+> pretty fileCount)
+        message $ brackets (pretty n <+> "of" <+> pretty fileCount)
             <+> "Compiling" <+> pretty mdl
         eAst <- liftIO $ parseModuleFile path mdl
         case eAst of
-            Left errMsg -> printError (pretty errMsg)
+            Left errMsg -> fatal (pretty errMsg)
             Right ast -> do
                 rst <- runRenamerT ast
                 return (rst `seq` ())
