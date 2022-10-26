@@ -1,5 +1,5 @@
 {
-{-# LINE 2 "src/Blossom/Parsing/Parser.y" #-}
+-- {-# LINE 2 "src/Blossom/Parsing/Parser.y" #-}
 {-# OPTIONS_GHC -fno-prof-auto #-}
 {-# OPTIONS_GHC -fprof-auto-exported #-}
 
@@ -11,7 +11,7 @@ module Blossom.Parsing.Parser (
 ) where
 
 import Blossom.Common.Literal (Literal(..))
-import Blossom.Common.Name (ModuleName, Ident)
+import Blossom.Common.Name (ModuleName(..), Ident(..))
 import Blossom.Parsing.AbsSynTree
 import Blossom.Parsing.Lexer (Alex, lexError, lexer, runLexer)
 import Blossom.Parsing.Token (Token(..))
@@ -65,12 +65,12 @@ import Prettyprinter (pretty, (<+>))
 Module :: { AbsSynTree }
     : ImportList TopLevel { SynTree $1 $2 }
 
-ImportList :: { [AbsImport] }
+ImportList :: { [Import] }
     : ImportList Import { $2 : $1 }
     | {- EMPTY -} { [] }
 
-Import :: { AbsImport }
-    : import big_id ";" { Import $2 }
+Import :: { Import }
+    : import big_id ";" { mkImport $2 }
 
 TopLevel :: { [AbsTopLevelExpr] }
     : TopLevel TopLevelExpr { $2 : $1 }
@@ -183,6 +183,10 @@ Constructor :: { AbsConstructor }
 
 {
 {-# LINE 186 "src/Blossom/Parsing/Parser.y" #-}
+
+mkImport :: Ident -> Import
+mkImport (Ident iden loc) = Import (MdlName iden) loc
+
 
 parseError :: Token -> Alex a
 parseError tok = lexError $ pretty "Unexpected token:" <+> pretty tok

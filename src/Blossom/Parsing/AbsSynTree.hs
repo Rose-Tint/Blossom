@@ -4,7 +4,6 @@ module Blossom.Parsing.AbsSynTree (
     module Blossom.Typing.Type,
     AbsSynTree,
     AbsType,
-    AbsImport,
     AbsTopLevelExpr,
     AbsPattern,
     AbsExpr,
@@ -22,8 +21,6 @@ import Blossom.Parsing.SynTree
 type AbsSynTree = SynTree Ident
 
 type AbsType = Type Ident
-
-type AbsImport = Import Ident
 
 type AbsTopLevelExpr = TopLevelExpr Ident
 

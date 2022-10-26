@@ -8,6 +8,7 @@ module Blossom.Parsing.ParserTest (
 import Test.HUnit (Test(..), (@=?))
 import Blossom.Common.Literal (Literal(StringLit))
 import Blossom.Common.Name.Ident (Ident, testIdent)
+import Blossom.Common.Source (testLoc)
 import Blossom.Parsing.Parser (parseModule, parseType)
 import Blossom.Parsing.SynTree
 import Blossom.Typing.Type (Type(..))
@@ -50,7 +51,7 @@ tests = TestLabel "Blossom.Parsing.Parser" $ TestList [
                 \    = Failure (msg ++ \"\\nLast value: \" ++ pretty a);\n"
                 "" ""
             expected = Right $ SynTree {
-                moduleImports = [Import "Text::Pretty"],
+                moduleImports = [Import "Text::Pretty" testLoc],
                 moduleTopExprs = reverse [
                     DataDef "Except" ["a"] (reverse [
                         Constructor "Failure" (TypeCon "String"),

@@ -16,6 +16,7 @@ import Blossom.Config (cnfSourceFiles, readConfiguration)
 import Blossom.Common.Name.Module (fromFilePath)
 import Blossom.Parsing.Parser (parseModuleFile)
 import Prettyprinter (pretty, (<+>), brackets)
+import Blossom.Rename (runRenamerT)
 
 
 main :: IO ()
@@ -35,5 +36,7 @@ main' = do
         eAst <- liftIO $ parseModuleFile path mdl
         case eAst of
             Left errMsg -> printError (pretty errMsg)
-            Right !_ast -> return ()
+            Right ast -> do
+                rst <- runRenamerT ast
+                return (rst `seq` ())
         ) (zip [1..fileCount] sourceFiles)

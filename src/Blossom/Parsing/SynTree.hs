@@ -14,7 +14,8 @@ module Blossom.Parsing.SynTree (
 
 import Blossom.Typing.Type (Type(..))
 import Blossom.Common.Literal (Literal)
-import Blossom.Common.Source (HasLoc(..), mergeLocs)
+import Blossom.Common.Name.Module (ModuleName)
+import Blossom.Common.Source (HasLoc(..), mergeLocs, SourceLoc)
 import Prettyprinter (
     Pretty(pretty),
     PageWidth(..),
@@ -35,12 +36,16 @@ import Prettyprinter (
 
 
 data SynTree name = SynTree {
-    moduleImports :: [Import name],
+    moduleImports :: [Import],
     moduleTopExprs :: [TopLevelExpr name]
     }
     deriving (Show, Eq)
 
-newtype Import name = Import name
+data Import
+    = Import {
+        importName :: ModuleName,
+        importLoc :: SourceLoc
+    }
     deriving (Show, Eq)
 
 data TopLevelExpr name
@@ -97,8 +102,8 @@ instance Pretty name => Pretty (SynTree name) where
                 Unbounded -> pretty (replicate 78 '~')
                 )
 
-instance Pretty name => Pretty (Import name) where
-    pretty (Import mdl) = "import" <+> pretty mdl
+instance Pretty Import where
+    pretty (Import mdl _loc) = "import" <+> pretty mdl
 
 instance Pretty name => Pretty (TopLevelExpr name) where
     pretty (FuncDecl ident typ) =

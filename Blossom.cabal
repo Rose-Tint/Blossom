@@ -50,6 +50,7 @@ library
         Blossom.Parsing.Parser,
         Blossom.Parsing.SynTree,
         Blossom.Parsing.Token,
+        Blossom.Rename,
         Blossom.Typing.Type,
         Blossom.Typing.TypeEnv
     build-tool-depends:
