@@ -19,7 +19,6 @@ data CmdLine = CmdLine {
     }
     deriving (Show, Eq)
 
-
 parseCmdLine :: IO CmdLine
 parseCmdLine = execParser cmdLineParserInfo
 
@@ -54,5 +53,6 @@ cmdLineParser = CmdLine
             long "output-file"
             <> metavar "FILE"
             -- <> value "stdout"
+            <> hidden
             <> help "Path to the file to output to"
         ))
