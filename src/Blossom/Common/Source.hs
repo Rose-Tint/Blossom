@@ -8,26 +8,13 @@ module Blossom.Common.Source (
     Position(..),
     HasLoc(..),
     mergeLocs,
-    mergeSourceLocs,
-    mergeSourceLocs',
-    getSourceLines,
-    zeroLoc,
-    zeroPos,
     mkPos,
     unknownLoc,
     testLoc,
 ) where
 
 import Blossom.Common.Name.Module (ModuleName)
-import Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as BS (
-    splitAt,
-    concat,
-    takeWhile,
-    takeWhileEnd,
-    )
 import Data.Ord (comparing)
-import Data.String (fromString)
 import Prettyprinter (Pretty(pretty))
 
 
@@ -47,7 +34,9 @@ data SourceLoc
         locEnd :: Position
     }
     -- | If a source location does not exist, a reason must be given.
-    | UnknownLoc String
+    | UnknownLoc {
+        locReason :: String
+    }
 
 -- | Represents a position *within* a module. Does not contain module or file
 -- information because it is not meant to be used outside of `@SourceLoc@`.
@@ -59,70 +48,27 @@ data Position
     }
     deriving (Eq)
 
-instance Ord Position where
-    compare = comparing posOffset
-
 class HasLoc a where
     getLoc :: a -> SourceLoc
 
-instance HasLoc SourceLoc where
-    getLoc = id
-
-instance HasLoc a => HasLoc [a] where
-    getLoc [] = error "getLoc: empty list"
-    getLoc xs = mergeLocs (head xs) (last xs)
-
-mergeLocs :: (HasLoc a, HasLoc b) => a -> b -> SourceLoc
-mergeLocs a b = mergeSourceLocs (getLoc a) (getLoc b)
-
 -- | Merges source locations so that the beginning and ending of the resulting
--- `@SourceLoc@` is the earliest and latest, respectively, of the two given
--- `@SourceLoc@`s.
+-- `@SourceLoc@` is the earliest and latest of the source locations of the
+-- given values, respectively.
+mergeLocs :: (HasLoc a, HasLoc b) => a -> b -> SourceLoc
+mergeLocs a b = getLoc a <> getLoc b
+
 mergeSourceLocs :: SourceLoc -> SourceLoc -> SourceLoc
 mergeSourceLocs (SourceLoc p1 m1 b1 e1) (SourceLoc p2 m2 b2 e2)
-    | p1 /= p2 = UnknownLoc "paths did not match while merging locations."
-    | m1 /= m2 = UnknownLoc "module names did not match while merging locations."
+    | p1 /= p2 = UnknownLoc "paths did not match."
+    | m1 /= m2 = UnknownLoc "module names did not match."
     | otherwise = SourceLoc p1 m1 (min b1 b2) (max e1 e2)
 mergeSourceLocs (UnknownLoc rsn1) (UnknownLoc rsn2) = UnknownLoc $
     rsn1 ++ "; " ++ rsn2
 mergeSourceLocs UnknownLoc{} loc = loc
 mergeSourceLocs loc UnknownLoc{} = loc
 
--- | In the event of a conflict between the module name or path,
--- this version of the function will simply prefer the first one. Please prefer
--- to use `@mergeSourceLocs@` over this one.
-mergeSourceLocs' :: SourceLoc -> SourceLoc -> SourceLoc
-mergeSourceLocs' (SourceLoc path mdl b1 e1) (SourceLoc _p2 _m2 b2 e2) =
-    SourceLoc path mdl (min b1 b2) (max e1 e2)
-mergeSourceLocs' (UnknownLoc rsn1) (UnknownLoc rsn2) = UnknownLoc $
-    rsn1 ++ "; " ++ rsn2
-mergeSourceLocs' UnknownLoc{} loc = loc
-mergeSourceLocs' loc UnknownLoc{} = loc
-
--- | Extracts all of the lines that contain the location
-getSourceLines :: ByteString -> SourceLoc -> ByteString
-getSourceLines _ (UnknownLoc rsn) = fromString rsn
-getSourceLines bs (SourceLoc _path _mdl begin end) =
-    let (preBeginSplit, postBeginSplit) = flip BS.splitAt bs $
-            fromEnum (posOffset begin)
-        -- `preBegin` is the part after the last newline before the offset of
-        -- `begin`
-        preBegin = BS.takeWhileEnd (/= '\n') preBeginSplit
-        (between, postEndSplit) = flip BS.splitAt postBeginSplit $
-            fromEnum (posOffset end - posOffset begin)
-        -- `preEnd` is the part before the first newline after the offset of
-        -- `end`
-        postEnd = BS.takeWhile (/= '\n') postEndSplit
-    in BS.concat [preBegin, between, postEnd]
-
 mkPos :: (Integral l, Integral c, Integral o) => l -> c -> o -> Position
 mkPos l c o = Pos (fromIntegral l) (fromIntegral c) (fromIntegral o)
-
-zeroPos :: Position
-zeroPos = Pos 0 0 0
-
-zeroLoc :: SourceLoc
-zeroLoc = SourceLoc mempty mempty zeroPos zeroPos
 
 unknownLoc :: String -> SourceLoc
 unknownLoc = UnknownLoc
@@ -158,6 +104,19 @@ instance Eq SourceLoc where
         | rsn == testLocRsn = True
         | otherwise = False
 
+instance HasLoc SourceLoc where
+    getLoc = id
+
+instance HasLoc a => HasLoc [a] where
+    getLoc [] = error "getLoc: empty list"
+    getLoc xs = getLoc (head xs) <> getLoc (last xs)
+
+instance Semigroup SourceLoc where
+    (<>) = mergeSourceLocs
+
+instance Monoid SourceLoc where
+    mempty = SourceLoc mempty mempty (Pos 0 0 0) (Pos 0 0 0)
+
 instance Pretty SourceLoc where
     pretty (UnknownLoc rsn) = "?(" <> pretty rsn <> ")"
     pretty (SourceLoc path _mdl begin _end) = pretty path <> ":" <> pretty begin
@@ -165,6 +124,9 @@ instance Pretty SourceLoc where
 instance Show Position where
     show (Pos ln col off) = "Pos " ++
         show ln ++ " " ++ show col ++ " " ++ show off
+
+instance Ord Position where
+    compare = comparing posOffset
 
 instance Pretty Position where
     pretty (Pos ln col _off) = pretty ln <> ":" <> pretty col
