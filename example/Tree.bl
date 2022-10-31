@@ -1,0 +1,17 @@
+data Tree a {
+    Empty;
+    Node: a -> Tree a -> Tree a;
+}
+
+func insert : a -> Tree a -> Tree a;
+func insert a tree
+    = match (tree) {
+        (Empty) => Node a Empty Empty;
+        (Node b left right) => match (a < b) {
+            True => Node b (insert a left) right;
+            False => match (a > b) {
+                True => Node b left (insert a right);
+                False => Node a left right;
+            };
+        };
+    };
