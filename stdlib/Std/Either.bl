@@ -1,0 +1,25 @@
+data Either a b {
+    Left: a;
+    Right: b;
+}
+
+func fromLeft: a -> Either a b -> a;
+func fromLeft def either
+    = match (either) {
+        (Left a) => a;
+        (Right b) => def;
+    };
+
+func fromRight: b -> Either a b -> b;
+func fromRight def either
+    = match (either) {
+        (Left a) => def;
+        (Right b) => b;
+    };
+
+func elimEither: (a -> c) -> (b -> c) -> Either a b -> c;
+func elimEither (left: a -> c) (right: b -> c) (either: Either a b)
+    = match (either) {
+        (Left a) => left a;
+        (Right b) => right b;
+    };

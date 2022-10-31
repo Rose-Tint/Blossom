@@ -1,0 +1,11 @@
+data Maybe a {
+    Just: a;
+    None;
+}
+
+func fromJust: a -> Maybe a -> a;
+func fromJust def maybe
+    = match (maybe) {
+        (Just a) => a;
+        (None) => def;
+    };
