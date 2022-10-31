@@ -4,7 +4,7 @@ module Blossom.Parsing.Token (
     Token(..),
 ) where
 
-import Blossom.Common.Name (Ident)
+import Blossom.Common.Name.Ident (Ident)
 import Data.ByteString.Lazy.Char8 (ByteString, unpack)
 import Prettyprinter (
     Pretty(pretty),
@@ -12,7 +12,11 @@ import Prettyprinter (
     backslash,
     colon,
     equals,
-    semi, lparen, rparen, lbrace, rbrace
+    semi,
+    lparen,
+    rparen,
+    lbrace,
+    rbrace,
     )
 
 
