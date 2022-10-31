@@ -1,10 +1,15 @@
 module Blossom.Config.CmdLine (
     CmdLine(..),
+    applyCmdLine,
     parseCmdLine,
 ) where
 
 import Blossom.Config.Verbosity (Verbosity(..))
 import Options.Applicative
+import Blossom.Config.Config
+import Blossom.Common.OStream (fileStream)
+import Data.Maybe (fromMaybe)
+import Data.List (union)
 
 
 -- | Represents options provided by command-line arguments.
@@ -18,6 +23,18 @@ data CmdLine = CmdLine {
     cmdOStream :: Maybe FilePath
     }
     deriving (Show, Eq)
+
+applyCmdLine :: Config -> IO Config
+applyCmdLine cnf = do
+    cmd <- parseCmdLine
+    ostream <- case cmdOStream cmd of
+        Nothing -> return $! cnfOStream cnf
+        Just filepath -> fileStream filepath
+    return $ cnf {
+        cnfSourceFiles = cmdSourceFiles cmd `union` cnfSourceFiles cnf,
+        cnfVerbosity = fromMaybe (cnfVerbosity cnf) (cmdVerbosity cmd),
+        cnfOStream = ostream
+    }
 
 parseCmdLine :: IO CmdLine
 parseCmdLine = execParser cmdLineParserInfo

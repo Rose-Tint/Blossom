@@ -43,6 +43,7 @@ library
         Blossom.Common.Source,
         Blossom.Config,
         Blossom.Config.CmdLine,
+        Blossom.Config.Config,
         Blossom.Config.Verbosity,
         Blossom.Monad,
         Blossom.Parsing.AbsSynTree,
