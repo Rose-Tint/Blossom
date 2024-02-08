@@ -6,17 +6,17 @@ module Main (
 
 import Blossom.Monad (
     Blossom,
-    liftIO,
+    -- liftIO,
     runBlossom,
-    getCnf,
+    -- getCnf,
     message,
-    fatal,
+    -- fatal,
     )
-import Blossom.Config (cnfSourceFiles, readConfiguration)
-import Blossom.Common.Name.Module (fromFilePath)
-import Blossom.Parsing.Parser (parseModuleFile)
-import Prettyprinter (pretty, (<+>), brackets)
-import Blossom.Rename (runRenamerT)
+import Blossom.Config (readConfiguration)
+-- import Blossom.Common.Name.Module (fromFilePath)
+-- import Blossom.Parsing.Parser (parseModuleFile)
+import Prettyprinter ({- pretty, (<+>), brackets -})
+-- import Blossom.Rename (runRenamerT)
 
 
 main :: IO ()
@@ -27,16 +27,17 @@ main = do
 
 main' :: Blossom ()
 main' = do
-    sourceFiles <- getCnf cnfSourceFiles
-    let fileCount = length sourceFiles
-    mapM_ (\(n, path) -> do
-        let mdl = fromFilePath path
-        message $ brackets (pretty n <+> "of" <+> pretty fileCount)
-            <+> "Compiling" <+> pretty mdl
-        eAst <- liftIO $ parseModuleFile path mdl
-        case eAst of
-            Left errMsg -> fatal (pretty errMsg)
-            Right ast -> do
-                rst <- runRenamerT ast
-                return (rst `seq` ())
-        ) (zip [1..fileCount] sourceFiles)
+    message "Work-in-progress!"
+    -- sourceFiles <- getCnf cnfSourceFiles
+    -- let fileCount = length sourceFiles
+    -- mapM_ (\(n, path) -> do
+    --     let mdl = fromFilePath path
+    --     message $ brackets (pretty n <+> "of" <+> pretty fileCount)
+    --         <+> "Compiling" <+> pretty mdl
+    --     eAst <- liftIO $ parseModuleFile path mdl
+    --     case eAst of
+    --         Left errMsg -> fatal (pretty errMsg)
+    --         Right ast -> do
+    --             rst <- runRenamerT ast
+    --             return (rst `seq` ())
+    --     ) (zip [1..fileCount] sourceFiles)

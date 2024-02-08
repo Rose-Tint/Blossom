@@ -4,48 +4,40 @@ module Blossom.Package.Token (
     Token(..),
 ) where
 
-import Blossom.Common.Name.Ident (Ident)
 import Data.ByteString (ByteString, unpack)
 import Blossom.Package.Version (Version)
 import Prettyprinter (Pretty(pretty), brackets)
 
 
 data Token
-    = TokExeHeader Ident
-    | TokLibHeader Ident
-    | TokPkgHeader Ident
+    = TokExeHeader
+    | TokLibHeader
     | TokString ByteString
-    | TokVersionVal Version
+    | TokVersion Version
     | TokComma
     | TokEq
     | TokLBracket
     | TokRBracket
-    | TokSourceDirs
-    | TokModules
-    | TokName
-    | TokVersion
-    | TokMain
-    | TokPath
-    | TokBool Bool
+    | KeySourceDirs
+    | KeyTargets
+    | KeyName
+    | KeyVersion
+    | KeyMain
     | TokEnd
     deriving (Show, Eq)
 
 instance Pretty Token where
-    pretty (TokExeHeader ident) = brackets $ "executable." <> pretty ident
-    pretty (TokLibHeader ident) = brackets $ "library." <> pretty ident
-    pretty (TokPkgHeader ident) = brackets $ "subpackage." <> pretty ident
+    pretty TokExeHeader = brackets "executable"
+    pretty TokLibHeader = brackets "library"
     pretty (TokString str) = "\"" <> pretty (unpack str) <> "\""
-    pretty (TokVersionVal vers) = pretty vers
+    pretty (TokVersion vers) = pretty vers
     pretty TokComma = ","
     pretty TokEq = "="
     pretty TokLBracket = "["
     pretty TokRBracket = "]"
-    pretty TokSourceDirs = "source-dirs"
-    pretty TokModules = "modules"
-    pretty TokName = "name"
-    pretty TokVersion = "version"
-    pretty TokMain = "main"
-    pretty TokPath = "path"
-    pretty (TokBool True) = "true"
-    pretty (TokBool False) = "false"
+    pretty KeySourceDirs = "source-dirs"
+    pretty KeyTargets = "modules"
+    pretty KeyName = "name"
+    pretty KeyVersion = "version"
+    pretty KeyMain = "main"
     pretty TokEnd = "end-of-input"

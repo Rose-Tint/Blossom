@@ -17,7 +17,8 @@ common base-depends
     default-language:
         Haskell2010
     default-extensions:
-        BangPatterns
+        BangPatterns,
+        LambdaCase
     other-extensions:
         OverloadedStrings
     ghc-options:
@@ -47,13 +48,9 @@ library
         Blossom.Config.Verbosity,
         Blossom.Package,
         Blossom.Package.Component,
-        Blossom.Package.Component.Executable,
-        Blossom.Package.Component.GenOpts,
-        Blossom.Package.Component.Library,
-        Blossom.Package.Component.Subpackage,
         Blossom.Package.Lexer,
+        Blossom.Package.Package,
         Blossom.Package.Parser,
-        Blossom.Package.Properties,
         Blossom.Package.Target,
         Blossom.Package.Token,
         Blossom.Package.Version,

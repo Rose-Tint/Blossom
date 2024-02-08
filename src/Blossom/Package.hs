@@ -1,13 +1,13 @@
 module Blossom.Package (
     Package(..),
+    getMainPackage
 ) where
 
-import Blossom.Package.Component (Component)
-import Blossom.Package.Properties (Properties)
+import Blossom.Package.Package
+-- import Blossom.Package.Parser (parsePackageFile)
+-- import System.Directory (findFile)
 
 
-data Package
-    = Package {
-        pkgProperties :: Properties,
-        pkgComponents :: [Component]
-    }
+getMainPackage :: IO Package
+getMainPackage = do
+    return undefined

@@ -1,4 +1,7 @@
+
 {
+  // Automatically created by phoityne-vscode extension.
+
   "version": "2.0.0",
   "presentation": {
     "reveal": "always",
@@ -6,53 +9,42 @@
   },
   "tasks": [
     {
+      // F7
       "group": {
         "kind": "build",
         "isDefault": true
       },
+      "label": "haskell build",
       "type": "shell",
-      "label": "Run",
-      "command": "cabal v2-run blossom-exe -O0 -- stdlib/Std/Either.bl stdlib/Std/Maybe.bl example/Tree.bl -v"
+      //"command": "cabal configure && cabal build"
+      "command": "stack build"
     },
     {
-      "group": {
-        "kind": "build",
-        "isDefault": false
-      },
+      // F6
+      "group": "build",
       "type": "shell",
-      "label": "Profile",
-      // FYI, for some reason, the "--enable-profiling" optoin makes cabal
-      // compile twice... :(
-      "command": "cabal v2-run blossom-prof -O2 -fprof --enable-profiling --  stdlib/Std/Either.bl stdlib/Std/Maybe.bl example/Tree.bl -v"
+      "label": "haskell clean & build",
+      //"command": "cabal clean && cabal configure && cabal build"
+      "command": "stack clean && stack build"
+      //"command": "stack clean ; stack build"  // for powershell
     },
     {
+      // F8
       "group": {
         "kind": "test",
         "isDefault": true
       },
       "type": "shell",
-      "label": "Test All",
-      "command": "cabal v2-test all -O0"
+      "label": "haskell test",
+      //"command": "cabal test"
+      "command": "stack test"
     },
     {
-      "group": {
-        "kind": "none",
-        "isDefault": false
-      },
+      // F6
+      "isBackground": true,
       "type": "shell",
-      "label": "Reinstall Dependencies",
-      "command": "cabal v2-build all -O2 -j4 --only-dependencies --reinstall --enable-profiling",
-      "problemMatcher": []
-    },
-    {
-      "group": {
-        "kind": "none",
-        "isDefault": false
-      },
-      "type": "shell",
-      "label": "Happy info",
-      "command": "happy src/Blossom/Parsing/Parser.y -d -i -s -g -c -a; rm ./src/Blossom/Parsing/Parser.hs",
-      "problemMatcher": []
+      "label": "haskell watch",
+      "command": "stack build --test --no-run-tests --file-watch"
     }
   ]
 }

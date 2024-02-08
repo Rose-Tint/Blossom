@@ -1,24 +1,44 @@
 module Blossom.Package.Component (
-    module Cmpnt,
     Component(..),
+    newLibrary,
+    newExecutable,
 ) where
 
-import Blossom.Package.Component.Executable as Cmpnt
-import Blossom.Package.Component.GenOpts as Cmpnt
-import Blossom.Package.Component.Library as Cmpnt
-import Blossom.Package.Component.Subpackage as Cmpnt
+import Blossom.Package.Target (Target)
+import Data.ByteString (ByteString)
 
 
 -- | Represents a library, executable, or subpackage to build.
 data Component
-    = Library Library
-    | Executable Executable
-    | Subpackage Subpackage
+    = Library {
+        cmpntName :: ByteString,
+        cmpntTargets :: [Target],
+        cmpntSourceDirs :: [FilePath],
+        cmpntDepends :: [ByteString]
+    }
+    | Executable {
+        cmpntName :: ByteString,
+        cmpntTargets :: [Target],
+        cmpntSourceDirs :: [FilePath],
+        cmpntDepends :: [ByteString],
+        -- | Path to a module that exports the `main` function that gets
+        -- executed.
+        exeMain :: FilePath
+    }
 
-instance IsCmpnt Component where
-    getGenOpts (Library lib) = getGenOpts lib
-    getGenOpts (Executable exe) = getGenOpts exe
-    getGenOpts (Subpackage sub) = getGenOpts sub
-    modifyGenOpts f (Library lib) = Library $ modifyGenOpts f lib
-    modifyGenOpts f (Executable exe) = Executable $ modifyGenOpts f exe
-    modifyGenOpts f (Subpackage sub) = Subpackage $ modifyGenOpts f sub
+newLibrary :: Component
+newLibrary = Library {
+    cmpntName = error "'name' is a required field",
+    cmpntTargets = [],
+    cmpntSourceDirs = [],
+    cmpntDepends = []
+    }
+
+newExecutable :: Component
+newExecutable = Executable {
+    cmpntName = error "'name' is a required field",
+    cmpntTargets = [],
+    cmpntSourceDirs = [],
+    cmpntDepends = [],
+    exeMain = error "'main' is a required field"
+    }

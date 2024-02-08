@@ -11,11 +11,10 @@ module Blossom.Package.Parser (
 ) where
 
 import Blossom.Common.Name.Module (ModuleName(..))
-import Blossom.Package (Package(..))
+import Blossom.Package.Package (Package(..), newPackage)
 import Blossom.Package.Component
 import Blossom.Package.Lexer (Alex, lexError, lexer, runLexer)
 import Blossom.Package.Token (Token(..))
-import Blossom.Package.Properties (Properties(..), emptyProperties)
 import Blossom.Package.Target (Target(..))
 import Data.ByteString.Char8 (unpack)
 import Data.ByteString.Lazy as BS (ByteString, toStrict, readFile)
@@ -30,83 +29,83 @@ import Prettyprinter (pretty, (<+>))
 
 %tokentype { Token }
 %token
-    executable              { TokExeHeader $$ }
-    library                 { TokLibHeader $$ }
-    subpackage              { TokPkgHeader $$ }
+    executable              { TokExeHeader }
+    library                 { TokLibHeader }
     string                  { TokString $$ }
-    version_val             { TokVersionVal $$ }
+    version_val             { TokVersion $$ }
     ","                     { TokComma }
     "="                     { TokEq }
     "["                     { TokLBracket }
     "]"                     { TokRBracket }
-    -- bool                    { TokBool $$ }
-    source_dirs             { TokSourceDirs }
-    modules                 { TokModules }
-    name                    { TokName }
-    version                 { TokVersion }
-    main                    { TokMain }
-    path                    { TokPath }
-
+    source_dirs             { KeySourceDirs }
+    targets                 { KeyTargets }
+    name                    { KeyName }
+    version                 { KeyVersion }
+    main                    { KeyMain }
 
 %%
 
 
 Package :: { Package }
-    : Properties Components { Package $1 $2 }
+    : Properties Components { $1 { pkgComponents = $2 } }
 
-Properties :: { Properties }
-    : Properties Property { $2 $1 }
-    | {- EMPTY -} { emptyProperties }
+Properties :: { Package }
+    : Properties PackageProperty { $2 $1 }
+    | {- EMPTY -} { newPackage }
 
-Property :: { Properties -> Properties }
-    : name "=" string { \p -> p { propsName = $3 } }
-    | version "=" version_val { \p -> p { propsVersion = $3 } }
+PackageProperty :: { Package -> Package }
+    : name "=" string { \p -> p { pkgName = $3 } }
+    | version "=" version_val { \p -> p { pkgVersion = $3 } }
 
 Components :: { [Component] }
     : Components Component { $2 : $1 }
     | {- EMPTY -} { [] }
 
 Component :: { Component }
-    : library LibraryOptions { Library (setCmpntName $1 $2) }
-    | executable ExecutableOptions { Executable (setCmpntName $1 $2) }
-    | subpackage SubpackageOptions { Subpackage (setCmpntName $1 $2) }
+    : library LibraryOptions { $2 }
+    | executable ExecutableOptions { $2 }
 
-LibraryOptions :: { Library }
+LibraryOptions :: { Component }
     : LibraryOptions LibraryOption { $2 $1 }
     | {- EMPTY -} { newLibrary }
 
-LibraryOption :: { Library -> Library }
+LibraryOption :: { Component -> Component }
     : GeneralOption { $1 }
 
-ExecutableOptions :: { Executable }
+ExecutableOptions :: { Component }
     : ExecutableOptions ExecutableOption { $2 $1 }
     | {- EMPTY -} { newExecutable }
 
-ExecutableOption :: { Executable -> Executable }
+ExecutableOption :: { Component -> Component }
     : GeneralOption { $1 }
     | main "=" string { \exe -> exe { exeMain = unpack $3 }}
 
-SubpackageOptions :: { Subpackage }
-    : SubpackageOptions SubpackageOption { $2 $1 }
-    | {- EMPTY -} { newSubpackage }
+-- an option that may appear in any component
+GeneralOption :: { Component -> Component }
+    : name "=" string { \c -> c { cmpntName = $3 } }
+    | source_dirs "=" SourceDirList { \c -> c { cmpntSourceDirs = $3 } }
+    | targets "=" TargetList { \c -> c { cmpntTargets = $3 } }
 
-SubpackageOption :: { Subpackage -> Subpackage }
-    : GeneralOption { $1 }
-    | path "=" string { \sub -> sub { subPath = unpack $3 }}
-
-GeneralOption :: { forall a. IsCmpnt a => a -> a }
-    : source_dirs "=" "[" SourceDirs "]" { setCmpntSourceDirs $4 }
-    | modules "=" "[" Targets "]" { setCmpntTargets $4 }
+SourceDirList :: { [FilePath] }
+    : "[" SourceDirs "," "]" { $2 }
+    | "[" SourceDirs "]" { $2 }
+    | "[" "]" { [] }
 
 SourceDirs :: { [FilePath] }
-    : SourceDirs string "," { unpack $2 : $1 }
-    | string "," { [unpack $1] }
-    | {- EMPTY -} { [] }
+    : SourceDirs "," string { unpack $3 : $1 }
+    | string { [unpack $1] }
+
+TargetList :: { [Target] }
+    : "[" Targets "," "]" { $2 }
+    | "[" Targets "]" { $2 }
+    | "[" "]" { [] }
 
 Targets :: { [Target] }
-    : Targets string "," { TargetModule (MdlName $2) : $1 }
-    | string "," { [TargetModule (MdlName $1)] }
-    | {- EMPTY -} { [] }
+    : Targets "," Target { $3 : $1 }
+    | Target { [$1] }
+
+Target :: { Target }
+    : string { TargetModule (MdlName $1) }
 
 
 {

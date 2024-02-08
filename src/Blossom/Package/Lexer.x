@@ -19,7 +19,7 @@ import Blossom.Common.Name (Ident(..))
 import Blossom.Common.Source (Position(..), SourceLoc(..), mkPos)
 import Blossom.Package.Token (Token(..))
 import Blossom.Package.Version (Version(..))
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString.Lazy.Char8 (ByteString, unpack)
 import qualified Data.ByteString.Lazy.Char8 as CBS (
     foldl',
     span,
@@ -28,7 +28,7 @@ import qualified Data.ByteString.Lazy.Char8 as CBS (
     )
 -- import qualified Data.ByteString.Lazy as ByteString -- imported by Alex
 import Data.Char (isDigit, digitToInt)
-import Prettyprinter (Doc, Pretty(..), nest)
+import Prettyprinter (Doc, Pretty(..), nest, (<+>))
 import qualified Prettyprinter as P (line)
 
 }
@@ -46,38 +46,34 @@ $escape_char        = [b t n f r \" \\]
 @string_char        = [^\"] | \\$escape_char
 
 tokens :-
-    $ws                                     { skip }
-    @newline                                { begin 0 }
-    <sc_list> $white                          { skip }
-    "#" .*                                  { begin 0 }
+    $ws                             { skip }
+    @newline                        { begin 0 }
+    <sc_list> $white                { skip }
+    "#" .*                          { begin 0 }
 
-    <sc_value> \"                             { begin sc_string }
-    <sc_string> @string_char+                 { mkString }
-    <sc_string> \"                            { begin sc_value }
+    <sc_value> \"                   { begin sc_string }
+    <sc_string> @string_char+       { mkString }
+    <sc_string> \"                  { begin sc_value }
 
-    <0> "["                                 { begin sc_sect }
-    <sc_sect> @section_name                   { section }
-    <sc_sect> "]"                             { begin 0 }
+    <0> "["                         { begin sc_sect }
+    <sc_sect> @section_name         { section }
+    <sc_sect> "]"                   { begin 0 }
 
     -- keys
-    <0> "source-dirs"                       { reserved TokSourceDirs }
-    <0> "modules"                           { reserved TokModules }
-    <0> "name"                              { reserved TokName }
-    <0> "version"                           { reserved TokVersion }
-    <0> "main"                              { reserved TokMain }
-    <0> "path"                              { reserved TokPath }
-
-    <0> "="                                 { equal }
-    <sc_value,sc_list> @version                 { version }
-    <sc_value,sc_list> "true"                   { reserved (TokBool True) }
-    <sc_value,sc_list> "false"                  { reserved (TokBool False) }
-    <sc_value> "["                            { lBracket }
-    <sc_list> "]"                             { rBracket }
-    <sc_list> ","                             { reserved TokComma }
+    <0> "source-dirs"               { reserved KeySourceDirs }
+    <0> "targets"                   { reserved KeyTargets }
+    <0> "name"                      { reserved KeyName }
+    <0> "version"                   { reserved KeyVersion }
+    <0> "main"                      { reserved KeyMain }
+    <0> "="                         { reserved TokEq `andBegin` sc_value }
+    <sc_value> @version             { version }
+    <sc_value> "["                  { lBracket }
+    <sc_list> "]"                   { reserved TokRBracket `andBegin` 0 }
+    <sc_list> ","                   { reserved TokComma }
 
 
 {
-{-# LINE 82 "src/Blossom/Package/Lexer.x" #-}
+{-# LINE 77 "src/Blossom/Package/Lexer.x" #-}
 
 alexEOF :: Alex Token
 alexEOF = return TokEnd
@@ -127,16 +123,10 @@ mkString (_, _, input, _) len = return $ TokString $
     ByteString.toStrict $ ByteString.take len input
 
 section :: Action
-section (posn, _, input, _) len = do
-    loc <- posnToLoc posn len
-    let iden = ByteString.take len input
-    let (start, dotIden) = CBS.break (== '.') iden
-    let newIden = ByteString.toStrict $CBS.dropWhile (== '.') dotIden
-    case start of
-        "executable" -> return (TokExeHeader (Ident newIden loc))
-        "library" -> return (TokLibHeader (Ident newIden loc))
-        "sub-package" -> return (TokPkgHeader (Ident newIden loc))
-        _ -> return (TokExeHeader (Ident (ByteString.toStrict iden) loc))
+section (_, _, input, _) len = case ByteString.take len input of
+    "executable" -> return TokExeHeader
+    "library" -> return TokLibHeader
+    str -> lexError $ "unrecognized component:" <+> pretty (unpack str)
 
 reserved :: Token -> Action
 reserved tok _ _ = return tok
@@ -159,7 +149,7 @@ version (_, _, input, _) len = do
             Just (minor, rest') -> case readNum (dropDot rest') of
                 Nothing -> return (Version major minor 0)
                 Just (patch, _) -> return (Version major minor patch)
-    return (TokVersionVal vers)
+    return (TokVersion vers)
     where
         dropDot = CBS.dropWhile (== '.')
         readNum str =
