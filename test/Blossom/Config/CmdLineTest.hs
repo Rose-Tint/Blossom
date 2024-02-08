@@ -44,18 +44,8 @@ tests = TestLabel "Blossom.Config.CmdLine" $ TestList [
             Just "/logs/test.log" @=? actual
         ],
     TestCase $ do
-        actual <- parseCmdLine' [
-            "path/to/some/module.bl",
-            "path/to/diff/module.bl",
-            "some/path/to/another.bl",
-            "-v"
-            ]
+        actual <- parseCmdLine' ["-v"]
         let expected = CmdLine {
-                cmdSourceFiles = [
-                    "path/to/some/module.bl",
-                    "path/to/diff/module.bl",
-                    "some/path/to/another.bl"
-                    ],
                 cmdVerbosity = Just Verbose,
                 cmdOStream = Nothing
                 }

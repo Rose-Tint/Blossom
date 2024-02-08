@@ -10,7 +10,6 @@ import Prettyprinter (PageWidth(..), LayoutOptions(..))
 
 data Config
     = Config {
-        cnfSourceFiles :: [FilePath],
         cnfVerbosity :: Verbosity,
         cnfOStream :: OStream,
         cnfDocLayout :: LayoutOptions
@@ -18,7 +17,6 @@ data Config
 
 defaultConfig :: Config
 defaultConfig = Config {
-    cnfSourceFiles = [],
     cnfVerbosity = Normal,
     cnfOStream = stdout,
     cnfDocLayout = LayoutOptions (AvailablePerLine 70 1.0)

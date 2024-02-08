@@ -6,10 +6,9 @@ module Blossom.Config.CmdLine (
 
 import Blossom.Config.Verbosity (Verbosity(..))
 import Options.Applicative
-import Blossom.Config.Config
+import Blossom.Config.Config (Config(..))
 import Blossom.Common.OStream (fileStream)
 import Data.Maybe (fromMaybe)
-import Data.List (union)
 
 
 -- | Represents options provided by command-line arguments.
@@ -18,7 +17,6 @@ import Data.List (union)
 -- an argument was actually provided. This is helpful when applying them
 -- to their respective `@Config@` settings.
 data CmdLine = CmdLine {
-    cmdSourceFiles :: [FilePath],
     cmdVerbosity :: Maybe Verbosity,
     cmdOStream :: Maybe FilePath
     }
@@ -31,7 +29,6 @@ applyCmdLine cnf = do
         Nothing -> return $! cnfOStream cnf
         Just filepath -> fileStream filepath
     return $ cnf {
-        cnfSourceFiles = cmdSourceFiles cmd `union` cnfSourceFiles cnf,
         cnfVerbosity = fromMaybe (cnfVerbosity cnf) (cmdVerbosity cmd),
         cnfOStream = ostream
     }
@@ -44,10 +41,7 @@ cmdLineParserInfo = info (helper <*> cmdLineParser) fullDesc
 
 cmdLineParser :: Parser CmdLine
 cmdLineParser = CmdLine
-    <$> many (strArgument (
-            metavar "FILES"
-        ))
-    <*> optional (
+    <$> optional (
             flag' Silent (
                 short 's'
                 <> long "silent"

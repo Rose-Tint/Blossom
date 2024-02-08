@@ -1,0 +1,5 @@
+# This is a config file that assists in trialing Blossom during development
+
+[lib.stdlib]
+source-dirs = [ "stdlib" ]
+verbosity = "verbose"
